@@ -9,10 +9,13 @@ QT       += core gui
 TARGET = 4985-A2
 TEMPLATE = app
 
+LIBS += C:\Qt\2010.05\mingw\lib\libws2_32.a
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+    tcpconnection.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+    tcpconnection.h
 
 FORMS    += mainwindow.ui
