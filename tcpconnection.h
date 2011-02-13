@@ -3,61 +3,63 @@
 
 #include <QObject>
 #include <QString>
+#include <QDebug>
 #include <windowsx.h>
 #include <winsock2.h>
 #include <sstream>
 
-#define TCP 0
-#define UDP 1
-#define MSGSIZE 1024
-#define WM_WSASYNC (WM_USER + 1)
+#include "connection.h"
 
-#define DATA_BUFSIZE 8192
-
-typedef struct _SOCKET_INFORMATION {
-   BOOL RecvPosted;
-   CHAR Buffer[DATA_BUFSIZE];
-   WSABUF DataBuf;
-   SOCKET Socket;
-   DWORD BytesSEND;
-   DWORD BytesRECV;
-   _SOCKET_INFORMATION *Next;
-} SOCKET_INFORMATION, * LPSOCKET_INFORMATION;
-
-class TCPConnection : public QObject
+class MainWindow;
+class TCPConnection : public Connection
 {
     Q_OBJECT
 private:
     WORD wVersionRequested_;
     WSADATA wsaData_;
-    SOCKADDR_IN serverSockAddrIn_;
     SOCKET socket_;
-    LPSOCKET_INFORMATION socketInfoList_;
-    HWND hWnd_;
 
 public:
-    explicit TCPConnection(HWND hWnd);
+    explicit TCPConnection(MainWindow* mainWindow);
     ~TCPConnection();
-    bool startServer(int port = 7000);
-    bool startClient(char* hostName, int port);
-    bool sendMessage(char* data, int data_length);
 
     bool accept(MSG * msg);
     bool read(MSG * msg);
     bool close(MSG * msg);
 
-    static void CreateSocketInformation(SOCKET_INFORMATION * socketInfoList,
-                                        SOCKET s) {
-        // Prepare SocketInfo structure for use.
-        socketInfoList->Socket = s;
-        socketInfoList->RecvPosted = FALSE;
-        socketInfoList->BytesSEND = 0;
-        socketInfoList->BytesRECV = 0;
-        //socketInfoList->Next = socketInfoList;
+
+    static void CALLBACK WorkerRoutine(DWORD error, DWORD bytesTransferred,
+                                       LPWSAOVERLAPPED overlapped,
+                                       DWORD inFlags) {
+
+        qDebug("STATIC TCPConnection::WorkerRoutine()");
+
+        // Reference the WSAOVERLAPPED structure as a SOCKET_INFORMATION structure
+        //LPSOCKET_INFORMATION SI = (LPSOCKET_INFORMATION) overlapped;
+
+        if (error != 0) {
+          qDebug("I/O operation failed with error %d\n", (int) error);
+        }
+
+        if (bytesTransferred == 0) {
+           //qDebug("Closing socket %d\n", SI->Socket);
+        }
+
+        if (error != 0 || bytesTransferred == 0) {
+           //closesocket(SI->Socket);
+           //GlobalFree(SI);
+           return;
+        }
+
+        char* buff = (char*) overlapped->hEvent;
+        buff[bytesTransferred] = '\0';
+
+        std::ostringstream output;
+        qDebug() << "READ: " << buff;
+        free(buff);
+        free(overlapped);
     }
 
-signals:
-    void display(QString);
 
 public slots:
     bool slotProcessWSAEvent(MSG * msg);

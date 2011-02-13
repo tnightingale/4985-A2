@@ -13,9 +13,15 @@ LIBS += C:\Qt\2010.05\mingw\lib\libws2_32.a
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    tcpconnection.cpp
+    tcpconnection.cpp \
+    server.cpp \
+    client.cpp \
+    connection.cpp
 
 HEADERS  += mainwindow.h \
-    tcpconnection.h
+    tcpconnection.h \
+    server.h \
+    client.h \
+    connection.h
 
 FORMS    += mainwindow.ui

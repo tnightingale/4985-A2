@@ -1,5 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "server.h"
+#include "client.h"
+#include "connection.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -17,17 +20,18 @@ MainWindow::~MainWindow()
 void MainWindow::start() {
     if (ui->tab_server->isVisible()) {
         qDebug("MainWindow::start(): Starting tcp server...");
-        TCPConnection* connection = new TCPConnection(this->winId());
-        connect(connection, SIGNAL(display(QString)), ui->server_log_output,
-                SLOT(append(QString)));
-        connect(this, SIGNAL(signalWMWSASyncRx(MSG*)), connection,
-                SLOT(slotProcessWSAEvent(MSG*)));
 
-        connection->startServer();
+        Server* server = new Server();
+        server->openTCPConnection(this);
+        server->start(); // TODO: Send requested port.
     }
 
     else if (ui->tab_client->isVisible()) {
         qDebug("MainWindow::start(): tab_client = %d", ui->tab_client->isVisible());
+
+        Client* client = new Client();
+        client->openTCPConnection(this);
+        client->start();
     }
 }
 

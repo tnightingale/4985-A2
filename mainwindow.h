@@ -4,7 +4,6 @@
 #include <QMainWindow>
 #include <windowsx.h>
 #include <winsock2.h>
-#include "tcpconnection.h"
 
 namespace Ui {
     class MainWindow;
@@ -19,6 +18,10 @@ public:
     ~MainWindow();
 
     bool winEvent(MSG * msg, long * result);
+
+    Ui::MainWindow* getUi() {
+        return ui;
+    }
 
 private:
     Ui::MainWindow *ui;
