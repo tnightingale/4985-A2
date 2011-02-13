@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "tcpconnection.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -18,14 +17,26 @@ MainWindow::~MainWindow()
 void MainWindow::start() {
     if (ui->tab_server->isVisible()) {
         qDebug("MainWindow::start(): Starting tcp server...");
-        TCPConnection* connection = new TCPConnection();
+        TCPConnection* connection = new TCPConnection(this->winId());
         connect(connection, SIGNAL(display(QString)), ui->server_log_output,
                 SLOT(append(QString)));
+        connect(this, SIGNAL(signalWMWSASyncRx(MSG*)), connection,
+                SLOT(slotProcessWSAEvent(MSG*)));
+
         connection->startServer();
-        connection->listen();
     }
 
     else if (ui->tab_client->isVisible()) {
         qDebug("MainWindow::start(): tab_client = %d", ui->tab_client->isVisible());
     }
+}
+
+bool MainWindow::winEvent(MSG * msg, long * result) {
+    switch (msg->message) {
+        case WM_WSASYNC:
+            emit signalWMWSASyncRx(msg);
+            return true;
+    }
+
+    return false;
 }

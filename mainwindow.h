@@ -2,6 +2,9 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <windowsx.h>
+#include <winsock2.h>
+#include "tcpconnection.h"
 
 namespace Ui {
     class MainWindow;
@@ -15,8 +18,13 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+    bool winEvent(MSG * msg, long * result);
+
 private:
     Ui::MainWindow *ui;
+
+signals:
+    void signalWMWSASyncRx(MSG * msg);
 
 public slots:
     void start();
