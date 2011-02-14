@@ -27,7 +27,7 @@ private:
     Ui::MainWindow *ui;
 
 signals:
-    void signalWMWSASyncRx(MSG * msg);
+    void signalWMWSASyncRx(PMSG pMsg);
 
 public slots:
     void start();

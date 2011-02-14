@@ -16,12 +16,16 @@ SOURCES += main.cpp\
     tcpconnection.cpp \
     server.cpp \
     client.cpp \
-    connection.cpp
+    connection.cpp \
+    socket.cpp \
+    tcpsocket.cpp
 
 HEADERS  += mainwindow.h \
     tcpconnection.h \
     server.h \
     client.h \
-    connection.h
+    connection.h \
+    socket.h \
+    tcpsocket.h
 
 FORMS    += mainwindow.ui
