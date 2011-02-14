@@ -50,6 +50,8 @@ bool Connection::startServer(int port) {
         return false;
     }
 
+    // TODO: Might want to call linger here.
+
     qDebug("Connection::startServer(): Server bound port %d to TCP socket %d",
            port, (int) socket_);
     output << "Server bound port " << port << " to TCP socket.";
