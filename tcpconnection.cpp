@@ -1,8 +1,14 @@
 #include "tcpconnection.h"
 #include "mainwindow.h"
 
-TCPConnection::TCPConnection(MainWindow* mainWindow) {
+TCPConnection::TCPConnection(MainWindow* mainWindow, int extraFlags) {
     int err = 0;
+    int flags = FD_CLOSE;
+    if (extraFlags > 0) {
+        flags |= extraFlags;
+    }
+
+    setData(NULL, 0);
 
     connect(mainWindow, SIGNAL(signalWMWSASyncRx(MSG*)),
             this, SLOT(slotProcessWSAEvent(MSG*)));
@@ -14,52 +20,71 @@ TCPConnection::TCPConnection(MainWindow* mainWindow) {
 
     setWindowHandle(mainWindow->winId());
 
-    openSocket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    openSocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, flags);
 }
 
 TCPConnection::~TCPConnection() {
-    closesocket(socket_);
+    qDebug("TCPConnection::~TCPConnection()");
+    char * data = NULL;
+    if ((getData(data)) > 0) {
+        free(data);
+    }
     WSACleanup();
 }
 
 bool TCPConnection::slotProcessWSAEvent(MSG * msg) {
     if (WSAGETSELECTERROR(msg->lParam)) {
-        qDebug("TCPConnection::slotProcessWSAEvent(): Socket failed with error %d.",
-               WSAGETSELECTERROR(msg->lParam));
+        qDebug("TCPConnection::slotProcessWSAEvent(): %d: Socket failed with error %d.",
+              (int) msg->wParam, WSAGETSELECTERROR(msg->lParam));
         return false;
     }
 
     switch (WSAGETSELECTEVENT(msg->lParam)) {
         case FD_ACCEPT:
+            qDebug("TDConnection::slotProcessWSAEvent: %d: FD_ACCEPT.", (int) msg->wParam);
             accept(msg);
             break;
+
         case FD_READ:
+            qDebug("TDConnection::slotProcessWSAEvent: %d: FD_READ.", (int) msg->wParam);
             read(msg);
             break;
+
+        case FD_WRITE:
+            qDebug("TDConnection::slotProcessWSAEvent: %d: FD_WRITE.", (int) msg->wParam);
+            sendMessage("aaaa", 4);
+            break;
+
         case FD_CLOSE:
+            qDebug("TDConnection::slotProcessWSAEvent: %d: FD_CLOSE.", (int) msg->wParam);
             close(msg);
+            break;
     }
 
     return true;
 }
 
 bool TCPConnection::accept(MSG * msg) {
-    int flags = FD_READ | FD_WRITE | FD_CLOSE;
+    int flags = FD_READ | FD_CLOSE;
     std::ostringstream output;
     SOCKET clientSocket;
     SOCKADDR_IN client;
     int client_length = sizeof(SOCKADDR_IN);
 
-    qDebug("TDConnection::accept().");
 
     if ((clientSocket = ::accept(msg->wParam, (SOCKADDR *) &client,
                                &client_length)) == INVALID_SOCKET) {
-        qDebug("TCPConnection:listen(); Error:");
-        return false;
+        if (WSAGetLastError() != WSAEWOULDBLOCK) {
+            qDebug("TCPConnection:accept(); Error: %d", WSAGetLastError());
+            return false;
+        }
     }
 
+    qDebug("TCPConnection::accept(): Communicating with client on socket: %d.",
+           (int) clientSocket);
+
     output << "Remote address (" << inet_ntoa(client.sin_addr)
-           << ") connected.";
+           << ") connected. (" << (int) clientSocket << ")";
     emit status(QString(output.str().c_str()));
 
     if (WSAAsyncSelect(clientSocket, getWindowHandle(), WM_WSASYNC,
@@ -95,13 +120,24 @@ bool TCPConnection::read(MSG * msg) {
     return true;
 }
 
+/**
+ * TODO: It appears this isn't getting called by the client.
+ */
 bool TCPConnection::close(MSG * msg) {
-    qDebug("TCPConnection::close().");
+    int err = 0;
 
-    QString output(": disconnected.");
-    emit status(output);
+    std::ostringstream output;
+    output << "\tSocket: " << (int) msg->wParam << " disconnected.";
+    emit status(output.str().c_str());
+
+    if ((err = WSAAsyncSelect(msg->wParam, getWindowHandle(), WM_WSASYNC,
+                              0)) == SOCKET_ERROR) {
+        qDebug("TCPConnection::close(): Error setting up async select.");
+        return false;
+    }
 
     closesocket(msg->wParam);
+    emit signalCloseConnection();
 
     return true;
 }

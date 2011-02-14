@@ -21,16 +21,16 @@ void MainWindow::start() {
     if (ui->tab_server->isVisible()) {
         qDebug("MainWindow::start(): Starting tcp server...");
 
-        Server* server = new Server();
-        server->openTCPConnection(this);
+        Server* server = new Server(this);
+        server->openTCPConnection();
         server->start(); // TODO: Send requested port.
     }
 
     else if (ui->tab_client->isVisible()) {
-        qDebug("MainWindow::start(): tab_client = %d", ui->tab_client->isVisible());
+        qDebug("MainWindow::start(): Client starting");
 
-        Client* client = new Client();
-        client->openTCPConnection(this);
+        Client* client = new Client(this);
+        client->openTCPConnection();
         client->start();
     }
 }

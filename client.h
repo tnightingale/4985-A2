@@ -12,12 +12,13 @@ class Client : public QObject
 {
     Q_OBJECT
 private:
+    MainWindow* mainWindow_;
     Connection* connection_;
 
 public:
-    explicit Client(QObject *parent = 0);
+    explicit Client(MainWindow* mainWindow);
 
-    bool openTCPConnection(MainWindow* mainWindow);
+    bool openTCPConnection();
     void start();
 
 signals:

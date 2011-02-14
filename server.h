@@ -12,11 +12,12 @@ class Server : public QObject
 {
     Q_OBJECT
 private:
+    MainWindow* mainWindow_;
     Connection* connection_;
 public:
-    explicit Server(QObject *parent = 0);
+    explicit Server(MainWindow* mainWindow);
 
-    bool openTCPConnection(MainWindow* mainWindow);
+    bool openTCPConnection();
     void start();
 
 signals:

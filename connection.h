@@ -28,10 +28,12 @@ private:
     SOCKET socket_;
     HWND hWnd_;
     int addressFamily_;
+    char * data_;
+    size_t data_len_;
 
 public:
     bool openSocket(int addressFamily, int connectionType,
-                    int protocol);
+                    int protocol, int flags);
 
     SOCKET* getSocket() {
         return &socket_;
@@ -40,6 +42,16 @@ public:
     virtual bool startServer(int port = 7000);
     virtual bool startClient(char* hostName, int port = 7000);
     bool sendMessage(char* data, int data_length);
+
+    void setData(char * data, size_t data_len) {
+        data_ = data;
+        data_len_ = data_len;
+    }
+
+    int getData(char * data) {
+        data = data_;
+        return data_len_;
+    }
 
     void setWindowHandle(HWND hWnd) {
         hWnd_ = hWnd;
@@ -57,6 +69,7 @@ public:
 
 signals:
     void status(QString);
+    void signalCloseConnection();
 
 public slots:
 

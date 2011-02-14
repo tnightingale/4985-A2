@@ -20,7 +20,7 @@ private:
     SOCKET socket_;
 
 public:
-    explicit TCPConnection(MainWindow* mainWindow);
+    explicit TCPConnection(MainWindow* mainWindow, int extraFlags = 0);
     ~TCPConnection();
 
     bool accept(MSG * msg);
@@ -54,8 +54,8 @@ public:
         char* buff = (char*) overlapped->hEvent;
         buff[bytesTransferred] = '\0';
 
-        std::ostringstream output;
-        qDebug() << "READ: " << buff;
+        qDebug() << "Bytes received: " << bytesTransferred;
+        qDebug() << "Data: \n" << buff;
         free(buff);
         free(overlapped);
     }

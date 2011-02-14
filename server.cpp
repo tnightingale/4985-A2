@@ -3,15 +3,12 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-Server::Server(QObject *parent) :
-    QObject(parent)
-{
-}
+Server::Server(MainWindow* mainWindow) : mainWindow_(mainWindow) {}
 
-bool Server::openTCPConnection(MainWindow* mainWindow) {
-    connection_ = new TCPConnection(mainWindow);
+bool Server::openTCPConnection() {
+    connection_ = new TCPConnection(mainWindow_, FD_ACCEPT);
     connect(connection_, SIGNAL(status(QString)),
-            mainWindow->getUi()->server_log_output, SLOT(append(QString)));
+            mainWindow_->getUi()->server_log_output, SLOT(append(QString)));
 
     return true;
 }
