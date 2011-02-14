@@ -3,6 +3,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "tcpsocket.h"
+#include "udpsocket.h"
 
 Server::Server(MainWindow* mainWindow) : mainWindow_(mainWindow) {}
 
@@ -31,6 +32,25 @@ bool Server::listenTCP(int port) {
     serverSockAddrIn.sin_addr.s_addr = htonl(INADDR_ANY);
 
     return tcpSocket->listen(&serverSockAddrIn);
+}
+
+bool Server::listenUDP(int port) {
+    HWND hWnd = mainWindow_->winId();
+    SOCKADDR_IN serverSockAddrIn;
+    UDPSocket* udpSocket = new UDPSocket(hWnd);
+
+    connect(mainWindow_, SIGNAL(signalWMWSASyncRx(PMSG)),
+            udpSocket, SLOT(slotProcessWSAEvent(PMSG)));
+
+    if (!Socket::init(udpSocket->getSocket(), hWnd, FD_READ | FD_WRITE | FD_CLOSE)) {
+        return false;
+    }
+
+    serverSockAddrIn.sin_family = AF_INET;
+    serverSockAddrIn.sin_port = htons(port);
+    serverSockAddrIn.sin_addr.s_addr = htonl(INADDR_ANY);
+
+    return udpSocket->listen(&serverSockAddrIn);
 }
 
 void Server::start() {

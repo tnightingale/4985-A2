@@ -18,7 +18,8 @@ SOURCES += main.cpp\
     client.cpp \
     connection.cpp \
     socket.cpp \
-    tcpsocket.cpp
+    tcpsocket.cpp \
+    udpsocket.cpp
 
 HEADERS  += mainwindow.h \
     tcpconnection.h \
@@ -26,6 +27,7 @@ HEADERS  += mainwindow.h \
     client.h \
     connection.h \
     socket.h \
-    tcpsocket.h
+    tcpsocket.h \
+    udpsocket.h
 
 FORMS    += mainwindow.ui

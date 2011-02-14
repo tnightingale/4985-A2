@@ -19,6 +19,8 @@ public:
 
     bool openTCPConnection();
     void start();
+    bool listenTCP(int port = 7000);
+    bool listenUDP(int port = 7000);
 
 signals:
 
