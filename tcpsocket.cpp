@@ -57,24 +57,27 @@ bool TCPSocket::listen(PSOCKADDR_IN pSockAddr) {
 
 bool TCPSocket::slotProcessWSAEvent(PMSG pMsg) {
     if (WSAGETSELECTERROR(pMsg->lParam)) {
-        qDebug("Socket::slotProcessWSAEvent(): %d: Socket failed with error %d",
+        qDebug("TCPSocket::slotProcessWSAEvent(): %d: Socket failed. Error: %d",
               (int) pMsg->wParam, WSAGETSELECTERROR(pMsg->lParam));
         return false;
     }
 
     switch (WSAGETSELECTEVENT(pMsg->lParam)) {
         case FD_ACCEPT:
-            qDebug("Socket::slotProcessWSAEvent: %d: FD_ACCEPT.", (int) pMsg->wParam);
+            qDebug("TCPSocket::slotProcessWSAEvent: %d: FD_ACCEPT.",
+                   (int) pMsg->wParam);
             accept(pMsg);
             break;
 
         case FD_READ:
-            qDebug("Socket::slotProcessWSAEvent: %d: FD_READ.", (int) pMsg->wParam);
+            qDebug("TCPSocket::slotProcessWSAEvent: %d: FD_READ.",
+                   (int) pMsg->wParam);
             receive(pMsg);
             break;
 
         case FD_WRITE:
-            qDebug("Socket::slotProcessWSAEvent: %d: FD_WRITE.", (int) pMsg->wParam);
+            qDebug("TCPSocket::slotProcessWSAEvent: %d: FD_WRITE.",
+                   (int) pMsg->wParam);
             send(pMsg);
             break;
 
