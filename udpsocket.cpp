@@ -18,13 +18,39 @@ void UDPSocket::send(PMSG pMsg) {
 }
 
 void UDPSocket::receive(PMSG pMsg) {
+    int err = 0;
+    DWORD flags = 0;
+    DWORD recvBytes;
+    WSAOVERLAPPED* ol;
 
+    PDATA data = (PDATA) calloc(1, sizeof(DATA));
+    data->socket = this;
+    data->winsockBuff.len = MAXUDPDGRAMSIZE;
+    data->winsockBuff.buf = (char*) calloc(data->winsockBuff.len, sizeof(char));
+    data->clientSD = pMsg->wParam;
+
+    ol = (WSAOVERLAPPED*) calloc(1, sizeof(WSAOVERLAPPED));
+    ol->hEvent = (HANDLE) data;
+
+    if (WSARecvFrom(pMsg->wParam, &(data->winsockBuff), 1, &recvBytes, &flags,
+                NULL, NULL, ol, UDPSocket::recvWorkerRoutine) == SOCKET_ERROR) {
+        if ((err = WSAGetLastError()) != WSA_IO_PENDING) {
+            qDebug("UDPSocket::receive(): WSARecv() failed with error %d",
+                   err);
+            return;
+        }
+    }
 }
 
 bool UDPSocket::slotProcessWSAEvent(PMSG pMsg) {
     if (WSAGETSELECTERROR(pMsg->lParam)) {
         qDebug("UDPSocket::slotProcessWSAEvent(): %d: Socket failed. Error: %d",
               (int) pMsg->wParam, WSAGETSELECTERROR(pMsg->lParam));
+        return false;
+    }
+
+    // Filtering out messages for other sockets / protocols.
+    if (pMsg->wParam != socket_) {
         return false;
     }
 

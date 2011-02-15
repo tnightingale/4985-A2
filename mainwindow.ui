@@ -117,13 +117,6 @@
         </rect>
        </property>
       </widget>
-      <zorder>packet_size</zorder>
-      <zorder>packet_size_label</zorder>
-      <zorder>packet_num</zorder>
-      <zorder>packet_num_label</zorder>
-      <zorder>packet_size_val</zorder>
-      <zorder>packet_num_val</zorder>
-      <zorder>protocol_settings</zorder>
      </widget>
      <widget class="QGroupBox" name="data_settings">
       <property name="geometry">
@@ -210,10 +203,6 @@
        </property>
       </widget>
      </widget>
-     <zorder>packet_settings</zorder>
-     <zorder>data_settings</zorder>
-     <zorder>data_settings_2</zorder>
-     <zorder>file_label_3</zorder>
     </widget>
     <widget class="QWidget" name="tab_server">
      <property name="toolTip">
@@ -296,6 +285,12 @@
        <width>101</width>
        <height>22</height>
       </rect>
+     </property>
+     <property name="text">
+      <string>7000</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
     </widget>
     <widget class="QLabel" name="port_label">

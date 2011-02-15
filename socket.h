@@ -4,10 +4,20 @@
 #include <QObject>
 #include <windowsx.h>
 #include <winsock2.h>
+#include <QTextStream>
 
 #define MSGSIZE 1024
 #define WM_WSASYNC (WM_USER + 1)
-#define DATA_BUFSIZE 8192
+#define DATABUFSIZE 2097152
+#define MAXUDPDGRAMSIZE 65507
+
+class Socket;
+
+typedef struct _DATA_ {
+    WSABUF winsockBuff;
+    Socket* socket;
+    SOCKET clientSD;
+} DATA, *PDATA;
 
 class Socket : public QObject
 {
@@ -21,12 +31,31 @@ protected:
     /**
      *
      */
+    char * data_;
+
+    /**
+     *
+     */
+    size_t data_len_;
+
+    /**
+     *
+     */
     HWND hWnd_;
 
 public:
-    //Socket() {}
-    //virtual ~Socket() {}
     SOCKET getSocket() { return socket_; }
+
+    /**
+     *
+     * @param dataSource
+     *
+     * @author Tom Nightingale.
+     */
+    void setDataSource(char * data, size_t data_len) {
+        data_len_ = data_len;
+        data_ = data;
+    }
 
     /**
      *
@@ -58,6 +87,10 @@ public:
      */
     void close(PMSG pMsg);
 
+    void outputStatus(QString& output) {
+        emit status(output);
+    }
+
     /**
      *
      * @param socket
@@ -82,6 +115,7 @@ public:
 
 signals:
     void signalCloseSocket(SOCKET socket);
+    void status(QString);
 
 public slots:
     /**

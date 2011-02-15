@@ -2,6 +2,8 @@
 #define CLIENT_H
 
 #include <QObject>
+#include <QString>
+#include <QDataStream>
 #include <QMainWindow>
 #include <winsock2.h>
 #include <windowsx.h>
@@ -18,8 +20,9 @@ private:
 public:
     explicit Client(MainWindow* mainWindow);
 
-    bool openTCPConnection();
-    void start();
+    //bool openTCPConnection();
+    //void start();
+    void writeTCP(char * hostName, int port, char * data, size_t data_len);
 
 signals:
 
