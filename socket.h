@@ -5,11 +5,14 @@
 #include <windowsx.h>
 #include <winsock2.h>
 #include <QTextStream>
+#include <QDataStream>
+#include <QFile>
 
 #define MSGSIZE 1024
 #define WM_WSASYNC (WM_USER + 1)
 #define DATABUFSIZE 2097152
 #define MAXUDPDGRAMSIZE 65507
+#define PACKETSIZE 4096
 
 class Socket;
 
@@ -31,12 +34,12 @@ protected:
     /**
      *
      */
-    char * data_;
+    QDataStream * data_;
 
     /**
      *
      */
-    size_t data_len_;
+    //size_t data_len_;
 
     /**
      *
@@ -44,6 +47,10 @@ protected:
     HWND hWnd_;
 
 public:
+    virtual ~Socket() {
+        delete data_;
+    }
+
     SOCKET getSocket() { return socket_; }
 
     /**
@@ -52,9 +59,17 @@ public:
      *
      * @author Tom Nightingale.
      */
-    void setDataSource(char * data, size_t data_len) {
-        data_len_ = data_len;
-        data_ = data;
+    void setDataStream(char * data) {
+        QByteArray * qba = new QByteArray(data);
+        data_ = new QDataStream(qba, QIODevice::ReadOnly);
+    }
+
+    /**
+     *
+     * @author Tom Nightingale.
+     */
+    void setDataStream(QFile * file) {
+        data_ = new QDataStream(file);
     }
 
     /**

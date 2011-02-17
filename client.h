@@ -9,20 +9,37 @@
 #include <windowsx.h>
 
 class MainWindow;
-class Connection;
+class Socket;
 class Client : public QObject
 {
     Q_OBJECT
 private:
     MainWindow* mainWindow_;
-    Connection* connection_;
+    Socket* socket_;
 
 public:
     explicit Client(MainWindow* mainWindow);
 
-    //bool openTCPConnection();
-    //void start();
-    void writeTCP(char * hostName, int port, char * data, size_t data_len);
+    /**
+     *
+     * @author Tom Nightingale.
+     */
+    void sendTCP();
+
+    /**
+     *
+     * @param hostName
+     * @param port
+     *
+     * @author Tom Nightingale.
+     */
+    void writeTCP(char * hostName, int port);
+
+    /**
+     *
+     * @author Tom Nightingale.
+     */
+    void send();
 
 signals:
 

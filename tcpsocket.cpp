@@ -10,7 +10,6 @@ TCPSocket::TCPSocket(HWND hWnd) {
     }
 
     hWnd_ = hWnd;
-    setDataSource(NULL, 0);
     open(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 }
 
@@ -39,19 +38,24 @@ void TCPSocket::accept(PMSG pMsg) {
 void TCPSocket::send(PMSG pMsg) {
     int err = 0;
     int result = 0;
+    size_t bytesRead = 0;
 
     DWORD numBytesSent = 0;
     WSAOVERLAPPED* ol;
     WSABUF winsockBuff;
 
-    winsockBuff.len = data_len_;
-    qDebug("Length: %d", data_len_);
-    winsockBuff.buf = data_;
+    winsockBuff.len = PACKETSIZE;
+    bytesRead = winsockBuff.len;
 
-    ol = (WSAOVERLAPPED*) calloc(1, sizeof(WSAOVERLAPPED));
-    ol->hEvent = (HANDLE) winsockBuff.buf;
 
-    while (data_len_ > 0) {
+    while (data_->status() == QDataStream::Ok) {
+        // These are free'd within TCPSocket::sendWorkerRoutine.
+        winsockBuff.buf = (char *) malloc(PACKETSIZE * sizeof(char));
+        ol = (WSAOVERLAPPED*) calloc(1, sizeof(WSAOVERLAPPED));
+
+        data_->readRawData(winsockBuff.buf, bytesRead);
+        ol->hEvent = (HANDLE) winsockBuff.buf;
+
         result = WSASend(pMsg->wParam, &winsockBuff, 1, &numBytesSent, 0, ol,
                           TCPSocket::sendWorkerRoutine);
         if ((err = WSAGetLastError()) > 0 && err != ERROR_IO_PENDING) {
@@ -63,17 +67,13 @@ void TCPSocket::send(PMSG pMsg) {
             return;
         }
 
-        data_len_ -= numBytesSent;
-        winsockBuff.len = data_len_;
-        winsockBuff.buf = data_ + numBytesSent;
+        //winsockBuff.buf = data_ + numBytesSent;
 
-        qDebug("TCPSocket::send(): Bytes remaining: %d.", data_len_);
+        //qDebug("TCPSocket::send(): Bytes remaining: %d.", data_len_);
     }
 
-    if (data_len_ == 0) {
+    if (data_->status() == QDataStream::Ok) {
         shutdown();
-        //free(data_);
-        //free(ol);
     }
 }
 

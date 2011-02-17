@@ -132,7 +132,9 @@ public:
           return;
         }
 
-        //char* buff = (char*) overlapped->hEvent;
+        char* buff = (char*) overlapped->hEvent;
+        free(buff);
+        free(overlapped);
         //buff[bytesTransferred] = '\0';
 
     }

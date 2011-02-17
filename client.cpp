@@ -1,43 +1,33 @@
 #include "client.h"
-//#include "tcpconnection.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "tcpsocket.h"
 #include "udpsocket.h"
 
 Client::Client(MainWindow* mainWindow) : mainWindow_(mainWindow) {}
-/*
-bool Client::openTCPConnection() {
-    connection_ = new TCPConnection(mainWindow_, FD_WRITE);
-    connect(connection_, SIGNAL(signalCloseConnection()),
-            this, SLOT(deleteLater()));
-    return true;
+
+void Client::sendTCP() {
+    HWND hWnd = mainWindow_->winId();
+    char * data = (char *) malloc(DATABUFSIZE * sizeof(char));
+    memset(data, 'p', DATABUFSIZE);
+
+    socket_ = new TCPSocket(hWnd);
+    socket_->setDataStream(data);
+    writeTCP("192.168.0.21", 7000);
 }
 
-void Client::start() {
-    char* buff = (char*) malloc(1024 * sizeof(char));
-    memset(buff, 'p', 1024);
-
-    connection_->setData(buff, 1024);
-    connection_->startClient("127.0.0.1", 7000);
-}
-*/
-
-void Client::writeTCP(char* hostName, int port, char * data, size_t data_len) {
+void Client::writeTCP(char* hostName, int port) {
+    int err = 0;
     PHOSTENT host;
     SOCKADDR_IN serverSockAddrIn;
-    TCPSocket* tcpSocket;
-    int err = 0;
-    HWND hWnd = mainWindow_->winId();
-
-    tcpSocket = new TCPSocket(hWnd);
-
-    if (!Socket::init(tcpSocket->getSocket(), hWnd, FD_WRITE | FD_CLOSE)) {
-        return;
-    }
+    TCPSocket * tcpsocket = (TCPSocket*) socket_;
 
     connect(mainWindow_, SIGNAL(signalWMWSASyncRx(PMSG)),
-            tcpSocket, SLOT(slotProcessWSAEvent(PMSG)));
+            tcpsocket, SLOT(slotProcessWSAEvent(PMSG)));
+
+    if (!Socket::init(tcpsocket->getSocket(), mainWindow_->winId(), FD_WRITE | FD_CLOSE)) {
+        return;
+    }
 
     if ((host = gethostbyname(hostName)) == NULL) {
         err = GetLastError();
@@ -53,10 +43,7 @@ void Client::writeTCP(char* hostName, int port, char * data, size_t data_len) {
     serverSockAddrIn.sin_family = AF_INET;
     serverSockAddrIn.sin_port = htons(port);
 
-    tcpSocket->setDataSource(data, data_len);
-
-    if (!tcpSocket->connectRemote(&serverSockAddrIn)) {
+    if (!tcpsocket->connectRemote(&serverSockAddrIn)) {
         return;
     }
-
 }

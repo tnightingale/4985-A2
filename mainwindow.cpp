@@ -66,12 +66,7 @@ void MainWindow::start() {
             switch (settings_.protocol) {
                 case TCP:
                     qDebug("MainWindow::start(): Client starting");
-                    address = "127.0.0.1";
-                    data = (char *) malloc(DATABUFSIZE * sizeof(char));
-                    memset(data, 'T', DATA_BUFSIZE);
-                    qDebug("Data prepped, size: %d", DATABUFSIZE);
-
-                    client->writeTCP(address, 7000, data, DATABUFSIZE);
+                    client->sendTCP();
                     break;
 
                 case UDP:
