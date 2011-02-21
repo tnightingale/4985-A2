@@ -74,9 +74,6 @@ void TCPSocket::send(PMSG pMsg) {
             return;
         }
 
-        //winsockBuff.buf = data_ + numBytesSent;
-
-        //qDebug("TCPSocket::send(): Bytes remaining: %d.", data_len_);
     }
     qDebug("TCPSocket::send(): Total bytes sent: %d", totalSent);
     if (data_->status() == QDataStream::Ok) {
