@@ -38,7 +38,9 @@ void TCPSocket::accept(PMSG pMsg) {
 void TCPSocket::send(PMSG pMsg) {
     int err = 0;
     int result = 0;
+    int num = 0;
     size_t bytesRead = 0;
+    size_t totalSent = 0;
 
     DWORD numBytesSent = 0;
     WSAOVERLAPPED* ol;
@@ -53,7 +55,12 @@ void TCPSocket::send(PMSG pMsg) {
         winsockBuff.buf = (char *) malloc(PACKETSIZE * sizeof(char));
         ol = (WSAOVERLAPPED*) calloc(1, sizeof(WSAOVERLAPPED));
 
-        data_->readRawData(winsockBuff.buf, bytesRead);
+        if ((num = data_->readRawData(winsockBuff.buf, bytesRead)) <= 0) {
+            qDebug("ABOUT TO TERM: %d", num);
+            break;
+        }
+        totalSent += num;
+        qDebug("Total sent: %d", totalSent);
         ol->hEvent = (HANDLE) winsockBuff.buf;
 
         result = WSASend(pMsg->wParam, &winsockBuff, 1, &numBytesSent, 0, ol,
@@ -71,7 +78,7 @@ void TCPSocket::send(PMSG pMsg) {
 
         //qDebug("TCPSocket::send(): Bytes remaining: %d.", data_len_);
     }
-
+    qDebug("TCPSocket::send(): Total bytes sent: %d", totalSent);
     if (data_->status() == QDataStream::Ok) {
         shutdown();
     }
