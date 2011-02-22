@@ -42,7 +42,7 @@ void Socket::close(PMSG pMsg) {
     log << "Socket: " << (int) pMsg->wParam << " disconnected.";
     emit status(output);
 
-    data_->unsetDevice();
+    //data_->unsetDevice();
 
     emit signalCloseSocket(pMsg->wParam);
     closesocket(pMsg->wParam);
