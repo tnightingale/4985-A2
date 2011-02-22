@@ -106,10 +106,6 @@ public:
     static void CALLBACK sendWorkerRoutine(DWORD error, DWORD bytesTransferred,
                                            LPWSAOVERLAPPED overlapped,
                                            DWORD inFlags) {
-
-        //qDebug("UDPSocket::sendWorkerRoutine() Bytes sent: %d",
-        //       bytesTransferred);
-
         if (error != 0) {
           qDebug("I/O operation failed with error %d\n", (int) error);
           return;
