@@ -39,7 +39,7 @@ protected:
     /**
      *
      */
-    //size_t data_len_;
+    size_t packetSize_;
 
     /**
      *
@@ -71,6 +71,22 @@ public:
     void setDataStream(QFile * file) {
         data_ = new QDataStream(file);
     }
+
+    /**
+     *
+     * @param packetSize
+     *
+     * @author Tom Nightingale
+     */
+    void setPacketSize(size_t packetSize) {
+        packetSize_ = packetSize;
+    }
+
+    /**
+     *
+     * @author Tom Nightingale.
+     */
+    size_t getPacketSize() { return packetSize_; }
 
     /**
      *

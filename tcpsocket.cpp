@@ -46,7 +46,7 @@ void TCPSocket::send(PMSG pMsg) {
     WSAOVERLAPPED* ol;
     WSABUF winsockBuff;
 
-    winsockBuff.len = PACKETSIZE;
+    winsockBuff.len = getPacketSize();
     bytesRead = winsockBuff.len;
 
 

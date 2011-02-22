@@ -6,6 +6,9 @@
 #include <winsock2.h>
 #include <cstdlib>
 #include <QIntValidator>
+#include <QRegExpValidator>
+#include <QRegExp>
+#include <QHostAddress>
 
 enum IPTEST_MODE {
     CLIENT,
@@ -21,6 +24,10 @@ typedef struct _SETTINGS_ {
     IPTEST_MODE mode;
     PROTOCOL protocol;
     int port;
+    QString address;
+    QString srcFilePath;
+    size_t packet_size;
+    size_t packet_count;
 } SETTINGS;
 
 namespace Ui {

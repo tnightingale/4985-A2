@@ -4,16 +4,21 @@
 #include "tcpsocket.h"
 #include "udpsocket.h"
 
-Client::Client(MainWindow* mainWindow) : mainWindow_(mainWindow) {}
+Client::Client(MainWindow* mainWindow, SETTINGS * settings)
+: mainWindow_(mainWindow) {
+    settings_ = settings;
+}
 
-void Client::sendTCP() {
+void Client::sendTCP(QString address, int port, size_t packetSize,
+                     size_t numPackets) {
     HWND hWnd = mainWindow_->winId();
-    char * data = (char *) malloc(DATABUFSIZE * sizeof(char));
-    memset(data, 'p', DATABUFSIZE);
+    char * data = (char *) malloc(packetSize * numPackets * sizeof(char));
+    memset(data, 'p', packetSize * numPackets);
 
     socket_ = new TCPSocket(hWnd);
     socket_->setDataStream(data);
-    writeTCP("192.168.0.21", 7000);
+    socket_->setPacketSize(packetSize);
+    writeTCP(address.toAscii().data(), port);
 }
 
 void Client::writeTCP(char* hostName, int port) {

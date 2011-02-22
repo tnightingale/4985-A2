@@ -8,6 +8,7 @@
 #include <winsock2.h>
 #include <windowsx.h>
 
+struct _SETTINGS_;
 class MainWindow;
 class Socket;
 class Client : public QObject
@@ -16,15 +17,19 @@ class Client : public QObject
 private:
     MainWindow* mainWindow_;
     Socket* socket_;
+    _SETTINGS_ * settings_;
 
 public:
-    explicit Client(MainWindow* mainWindow);
+    Client(MainWindow* mainWindow, _SETTINGS_ * settings);
 
     /**
+     * @param address
+     * @param port
      *
      * @author Tom Nightingale.
      */
-    void sendTCP();
+    void sendTCP(QString address, int port, size_t packetSize,
+                     size_t numPackets);
 
     /**
      *
