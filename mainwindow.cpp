@@ -37,15 +37,20 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->packet_size_val, SIGNAL(textChanged(QString)),
             this, SLOT(slotUpdateSettings(void)));
 
-    QValidator * portValidator = new QIntValidator(7000, 9000, this);
+    // File browse button
+    connect(ui->file_browse, SIGNAL(clicked()),
+            this, SLOT(slotBrowseFile()));
+
+    // File path
+    connect(ui->file_val, SIGNAL(textChanged(QString)),
+            this, SLOT(slotUpdateSettings()));
+
+    QValidator * portValidator = new QIntValidator(7000, 65535, this);
     ui->port_val->setValidator(portValidator);
 
-    QRegExp rx("(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)");
-    QRegExpValidator * addrValidator = new QRegExpValidator(rx, 0);
-    ui->dest_address->setValidator(addrValidator);
-
-    settings_.packet_count = 100;
-    settings_.packet_size = 4096;
+    //QRegExp rx("(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)");
+    //QRegExpValidator * addrValidator = new QRegExpValidator(rx, 0);
+    //ui->dest_address->setValidator(addrValidator);
 
     connect(ui->dest_address, SIGNAL(textChanged(QString)),
             this, SLOT(slotUpdateSettings(void)));
@@ -54,6 +59,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->start, SIGNAL(clicked()), this, SLOT(start()));
     slotUpdateSettings();
+
+    settings_.packet_count = 100;
+    settings_.packet_size = 4096;
 }
 
 MainWindow::~MainWindow()
@@ -89,17 +97,38 @@ void MainWindow::start() {
 
         case CLIENT:
             client = new Client(this, &settings_);
+
             switch (settings_.protocol) {
                 case TCP:
-                    qDebug("MainWindow::start(): Client starting");
-                    client->sendTCP(settings_.address,
-                                    settings_.port,
-                                    settings_.packet_size,
-                                    settings_.packet_count);
+                    if (ui->file_val->text() == NULL) {
+                        qDebug("MainWindow::start(): TCP Client starting");
+                        client->sendTCP(settings_.address,
+                                        settings_.port,
+                                        settings_.packet_size,
+                                        settings_.packet_count);
+                    } else {
+                        qDebug("MainWindow::start(): TCP Client starting -- file");
+                        client->sendFileTCP(settings_.address,
+                                            settings_.port,
+                                            settings_.packet_size,
+                                            settings_.srcFilePath);
+                    }
                     break;
 
                 case UDP:
-                    qDebug("MainWindow::start(): UDP client starting.");
+                    if (ui->file_val->text() == NULL) {
+                        qDebug("MainWindow::start(): UDP client starting.");
+                        client->sendUDP(settings_.address,
+                                        settings_.port,
+                                        settings_.packet_size,
+                                        settings_.packet_count);
+                    } else {
+                        qDebug("MainWindow::start(): UDP Client starting -- file");
+                        client->sendFileUDP(settings_.address,
+                                            settings_.port,
+                                            settings_.packet_size,
+                                            settings_.srcFilePath);
+                    }
                     break;
 
                 default:
@@ -124,6 +153,12 @@ bool MainWindow::winEvent(MSG * msg, long * result) {
     }
 
     return false;
+}
+
+void MainWindow::slotBrowseFile() {
+    settings_.srcFilePath = QFileDialog::getOpenFileName(this,
+        tr("Select file"), ".", tr("Any File(*.*)"));
+    ui->file_val->setText(settings_.srcFilePath);
 }
 
 void MainWindow::slotUpdateSettings(void) {

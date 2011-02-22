@@ -8,6 +8,9 @@
 class UDPSocket : public Socket
 {
     Q_OBJECT
+private:
+    SOCKADDR_IN serverSockAddrIn_;
+
 public:
     UDPSocket(HWND hWnd);
     ~UDPSocket() {}
@@ -27,6 +30,16 @@ public:
      * @author Tom Nightingale
      */
     void send(PMSG pMsg);
+
+    /**
+     *
+     * @author Tom Nightingale.
+     */
+    void setDest(PHOSTENT host, size_t port) {
+        memcpy((char*) &serverSockAddrIn_.sin_addr, host->h_addr, host->h_length);
+        serverSockAddrIn_.sin_family = AF_INET;
+        serverSockAddrIn_.sin_port = htons(port);
+    }
 
 public slots:
     /**
@@ -80,6 +93,29 @@ public:
         //qDebug() << "\tData:\n" << data->winsockBuff.buf;
 
         free(data);
+        free(overlapped);
+    }
+
+    /**
+     *
+     * @param error
+     *
+     * @author Tom Nightingale
+     */
+    static void CALLBACK sendWorkerRoutine(DWORD error, DWORD bytesTransferred,
+                                           LPWSAOVERLAPPED overlapped,
+                                           DWORD inFlags) {
+
+        //qDebug("UDPSocket::sendWorkerRoutine() Bytes sent: %d",
+        //       bytesTransferred);
+
+        if (error != 0) {
+          qDebug("I/O operation failed with error %d\n", (int) error);
+          return;
+        }
+
+        char* buff = (char*) overlapped->hEvent;
+        free(buff);
         free(overlapped);
     }
 };

@@ -52,7 +52,7 @@ void TCPSocket::send(PMSG pMsg) {
 
     while (data_->status() == QDataStream::Ok) {
         // These are free'd within TCPSocket::sendWorkerRoutine.
-        winsockBuff.buf = (char *) malloc(PACKETSIZE * sizeof(char));
+        winsockBuff.buf = (char *) malloc(winsockBuff.len * sizeof(char));
         ol = (WSAOVERLAPPED*) calloc(1, sizeof(WSAOVERLAPPED));
 
         if ((num = data_->readRawData(winsockBuff.buf, bytesRead)) <= 0) {

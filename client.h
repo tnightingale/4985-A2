@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QString>
 #include <QDataStream>
+#include <QFile>
 #include <QMainWindow>
 #include <winsock2.h>
 #include <windowsx.h>
@@ -30,6 +31,8 @@ public:
      */
     void sendTCP(QString address, int port, size_t packetSize,
                      size_t numPackets);
+    void sendFileTCP(QString address, int port, size_t packetSize,
+                     QString filepath);
 
     /**
      *
@@ -39,6 +42,19 @@ public:
      * @author Tom Nightingale.
      */
     void writeTCP(char * hostName, int port);
+
+    /**
+     *
+     */
+    void sendUDP(QString address, int port, size_t packetSize,
+                 size_t numPackets);
+    void sendFileUDP(QString address, int port, size_t packetSize,
+                     QString filepath);
+
+    /**
+     *
+     */
+    void writeUDP(char* hostName, int port);
 
     /**
      *

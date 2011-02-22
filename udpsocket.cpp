@@ -14,7 +14,50 @@ UDPSocket::UDPSocket(HWND hWnd) {
 }
 
 void UDPSocket::send(PMSG pMsg) {
+    int err = 0;
+    int result = 0;
+    int num = 0;
+    size_t bytesRead = 0;
+    size_t totalSent = 0;
 
+    DWORD numBytesSent = 0;
+    WSAOVERLAPPED* ol;
+    WSABUF winsockBuff;
+
+    winsockBuff.len = getPacketSize();
+    bytesRead = winsockBuff.len;
+
+
+    while (data_->status() == QDataStream::Ok) {
+        // These are free'd within UDPSocket::sendWorkerRoutine.
+        winsockBuff.buf = (char *) malloc(winsockBuff.len * sizeof(char));
+        ol = (WSAOVERLAPPED*) calloc(1, sizeof(WSAOVERLAPPED));
+
+        if ((num = data_->readRawData(winsockBuff.buf, bytesRead)) <= 0) {
+            qDebug("ABOUT TO TERM: %d", num);
+            break;
+        }
+        totalSent += num;
+        qDebug("Total sent: %d", totalSent);
+        ol->hEvent = (HANDLE) winsockBuff.buf;
+
+        result = WSASendTo(pMsg->wParam, &winsockBuff, 1, &numBytesSent, 0,
+                           (PSOCKADDR) &serverSockAddrIn_, sizeof(serverSockAddrIn_), ol,
+                           UDPSocket::sendWorkerRoutine);
+        if ((err = WSAGetLastError()) > 0 && err != ERROR_IO_PENDING) {
+            qDebug("UDPSocket::send(); Error: %d", err);
+            return;
+        }
+
+        if (result == WSAEWOULDBLOCK) {
+            return;
+        }
+
+    }
+    qDebug("UDPSocket::send(): Total bytes sent: %d", totalSent);
+    if (data_->status() == QDataStream::Ok) {
+        shutdown(socket_, SD_BOTH);
+    }
 }
 
 void UDPSocket::receive(PMSG pMsg) {

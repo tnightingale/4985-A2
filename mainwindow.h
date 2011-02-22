@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QFileDialog>
 #include <windowsx.h>
 #include <winsock2.h>
 #include <cstdlib>
@@ -57,6 +58,7 @@ signals:
 
 public slots:
     void start();
+    void slotBrowseFile();
     void slotUpdateSettings(void);
 
 };
