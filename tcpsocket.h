@@ -81,6 +81,7 @@ public:
                                            DWORD inFlags) {
         static int count = 0;
         static int totalRecv = 0;
+        int num = 0;
 
         QString output;
         QTextStream log(&output, QIODevice::WriteOnly);
@@ -107,11 +108,12 @@ public:
         qDebug() << "\tBytes received: " << bytesTransferred;
 
         QDataStream * fileOutput = data->socket->getDataStream();
-        if ((fileOutput->writeRawData(data->winsockBuff.buf, bytesTransferred)) < 0) {
+        if ((num = fileOutput->writeRawData(data->winsockBuff.buf, bytesTransferred)) < 0) {
             qDebug("STATIC TCPSocket::recvWorkerRoutine(): Error writing to file.");
             log << "Error writing to file.";
             data->socket->outputStatus(output);
         }
+        qDebug("Written %d bytes.", num);
 
         data->socket->outputStatus(output);
         free(data);
