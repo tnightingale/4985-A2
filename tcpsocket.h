@@ -102,10 +102,7 @@ public:
             << "Received: " << bytesTransferred << ", "
             << "Total: " << totalRecv;
 
-        qDebug("STATIC TCPSocket::recvWorkerRoutine()");
-        qDebug("\tPacket no: %d", count);
-        qDebug("\tTotal received (bytes): %d", totalRecv);
-        qDebug() << "\tBytes received: " << bytesTransferred;
+        qDebug("STATIC TCPSocket::recvWorkerRoutine(): Packet no: %d, Bytes received: %d, Total received (bytes): %d", count, bytesTransferred, totalRecv);
 
         QDataStream * fileOutput = data->socket->getDataStream();
         if ((num = fileOutput->writeRawData(data->winsockBuff.buf, bytesTransferred)) < 0) {
@@ -113,7 +110,7 @@ public:
             log << "Error writing to file.";
             data->socket->outputStatus(output);
         }
-        qDebug("Written %d bytes.", num);
+        qDebug("\tWritten %d bytes.", num);
 
         data->socket->outputStatus(output);
         free(data);
