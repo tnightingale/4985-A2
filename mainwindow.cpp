@@ -2,7 +2,6 @@
 #include "ui_mainwindow.h"
 #include "server.h"
 #include "client.h"
-#include "connection.h"
 #include "socket.h"
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -10,11 +9,24 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    initGui();
 
     settings_.mode = CLIENT;
     settings_.protocol = TCP;
     settings_.port = 7000;
 
+    slotUpdateSettings();
+
+    settings_.packet_count = 100;
+    settings_.packet_size = 4096;
+}
+
+MainWindow::~MainWindow()
+{
+    delete ui;
+}
+
+void MainWindow::initGui() {
     // Port
     connect(ui->port_val, SIGNAL(textChanged(QString)),
             this, SLOT(slotUpdateSettings(void)));
@@ -36,14 +48,22 @@ MainWindow::MainWindow(QWidget *parent) :
             this, SLOT(slotUpdateSettings()));
     connect(ui->packet_size_val, SIGNAL(textChanged(QString)),
             this, SLOT(slotUpdateSettings(void)));
-
-    // File browse button
+    // File browse buttons
     connect(ui->file_browse, SIGNAL(clicked()),
-            this, SLOT(slotBrowseFile()));
-
+            this, SLOT(slotBrowseFileSrc()));
+    connect(ui->file_dest_browse, SIGNAL(clicked()),
+            this, SLOT(slotBrowseFileDst()));
     // File path
     connect(ui->file_val, SIGNAL(textChanged(QString)),
             this, SLOT(slotUpdateSettings()));
+    connect(ui->file_dest_val, SIGNAL(textChanged(QString)),
+            this, SLOT(slotUpdateSettings()));
+    // Destination address
+    connect(ui->dest_address, SIGNAL(textChanged(QString)),
+            this, SLOT(slotUpdateSettings(void)));
+    // Start button
+    connect(ui->start, SIGNAL(clicked()),
+            this, SLOT(start()));
 
     QValidator * portValidator = new QIntValidator(7000, 65535, this);
     ui->port_val->setValidator(portValidator);
@@ -51,22 +71,6 @@ MainWindow::MainWindow(QWidget *parent) :
     //QRegExp rx("(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)");
     //QRegExpValidator * addrValidator = new QRegExpValidator(rx, 0);
     //ui->dest_address->setValidator(addrValidator);
-
-    connect(ui->dest_address, SIGNAL(textChanged(QString)),
-            this, SLOT(slotUpdateSettings(void)));
-    connect(ui->file_val, SIGNAL(textChanged(QString)),
-            this, SLOT(slotUpdateSettings(void)));
-
-    connect(ui->start, SIGNAL(clicked()), this, SLOT(start()));
-    slotUpdateSettings();
-
-    settings_.packet_count = 100;
-    settings_.packet_size = 4096;
-}
-
-MainWindow::~MainWindow()
-{
-    delete ui;
 }
 
 void MainWindow::start() {
@@ -155,15 +159,23 @@ bool MainWindow::winEvent(MSG * msg, long * result) {
     return false;
 }
 
-void MainWindow::slotBrowseFile() {
+void MainWindow::slotBrowseFileSrc() {
     settings_.srcFilePath = QFileDialog::getOpenFileName(this,
         tr("Select file"), ".", tr("Any File(*.*)"));
     ui->file_val->setText(settings_.srcFilePath);
 }
 
+void MainWindow::slotBrowseFileDst() {
+    settings_.srcFilePath = QFileDialog::getSaveFileName(this,
+        tr("Select file"), ".", tr("Any File(*.*)"));
+    ui->file_dest_val->setText(settings_.srcFilePath);
+}
+
 void MainWindow::slotUpdateSettings(void) {
     bool enabled = true;
     QHostAddress address;
+
+    settings_.mode = (ui->mode_tabs->currentIndex() == 0) ? CLIENT : SERVER;
 
     switch (settings_.mode) {
         case CLIENT:
@@ -179,7 +191,9 @@ void MainWindow::slotUpdateSettings(void) {
             break;
 
         case SERVER:
-
+            if (ui->file_dest_val->text() == NULL) {
+                enabled = false;
+            }
             break;
 
         default:
@@ -191,9 +205,9 @@ void MainWindow::slotUpdateSettings(void) {
         enabled = false;
     }
 
-    settings_.mode = (ui->mode_tabs->currentIndex() == 0) ? CLIENT : SERVER;
     settings_.protocol = (ui->protocol_tcp_radio->isChecked()) ? TCP : UDP;
     settings_.srcFilePath = ui->file_val->text();
+    settings_.dstFilePath = ui->file_dest_val->text();
 
     if (!enabled) {
         ui->start->setEnabled(false);
@@ -203,4 +217,8 @@ void MainWindow::slotUpdateSettings(void) {
     }
 
     settings_.address = ui->dest_address->text();
+}
+
+void MainWindow::log(QString output) {
+    ui->server_log_output->append(output);
 }

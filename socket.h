@@ -74,6 +74,14 @@ public:
 
     /**
      *
+     * @author Tom Nightingale.
+     */
+    QDataStream * getDataStream() {
+        return data_;
+    }
+
+    /**
+     *
      * @param packetSize
      *
      * @author Tom Nightingale

@@ -1,29 +1,24 @@
 #include "server.h"
-//#include "tcpconnection.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "tcpsocket.h"
 #include "udpsocket.h"
 
-Server::Server(MainWindow* mainWindow) : mainWindow_(mainWindow) {}
-
-/*
-bool Server::openTCPConnection() {
-    connection_ = new TCPConnection(mainWindow_, FD_ACCEPT);
-    connect(connection_, SIGNAL(status(QString)),
-            mainWindow_->getUi()->server_log_output, SLOT(append(QString)));
-
-    return true;
+Server::Server(MainWindow* mainWindow) : mainWindow_(mainWindow) {
+    file_ = new QFile(mainWindow->getUi()->file_dest_val->text());
+    if (!file_->open(QIODevice::WriteOnly)) {
+        mainWindow_->log(QString("Error opening file: ")
+                         + mainWindow->getUi()->file_dest_val->text());
+        throw "Server::Server; Cannot open file for write.";
+    }
 }
-*/
 
 bool Server::listenTCP(int port) {
-    QString output;
-    QTextStream log(&output, QIODevice::WriteOnly);
-
     HWND hWnd = mainWindow_->winId();
     SOCKADDR_IN serverSockAddrIn;
+
     TCPSocket* tcpSocket = new TCPSocket(hWnd);
+    tcpSocket->setDataStream(file_);
 
     connect(tcpSocket, SIGNAL(status(QString)),
             mainWindow_->getUi()->server_log_output, SLOT(append(QString)));
@@ -39,18 +34,16 @@ bool Server::listenTCP(int port) {
     serverSockAddrIn.sin_port = htons(port);
     serverSockAddrIn.sin_addr.s_addr = htonl(INADDR_ANY);
 
-    log << "Starting TCP server...";
-    tcpSocket->outputStatus(output);
+    mainWindow_->log(QString("Starting TCP server..."));
+
     return tcpSocket->listen(&serverSockAddrIn);
 }
 
 bool Server::listenUDP(int port) {
-    QString output;
-    QTextStream log(&output, QIODevice::WriteOnly);
-
     HWND hWnd = mainWindow_->winId();
     SOCKADDR_IN serverSockAddrIn;
     UDPSocket* udpSocket = new UDPSocket(hWnd);
+    udpSocket->setDataStream(file_);
 
     connect(udpSocket, SIGNAL(status(QString)),
             mainWindow_->getUi()->server_log_output, SLOT(append(QString)));
@@ -66,13 +59,6 @@ bool Server::listenUDP(int port) {
     serverSockAddrIn.sin_port = htons(port);
     serverSockAddrIn.sin_addr.s_addr = htonl(INADDR_ANY);
 
-    log << "Starting UDP server...";
-    udpSocket->outputStatus(output);
+    mainWindow_->log(QString("Starting UDP server..."));
     return udpSocket->listen(&serverSockAddrIn);
 }
-
-/*
-void Server::start() {
-    connection_->startServer();
-}
-*/

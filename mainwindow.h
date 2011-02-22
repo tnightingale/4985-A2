@@ -27,6 +27,7 @@ typedef struct _SETTINGS_ {
     int port;
     QString address;
     QString srcFilePath;
+    QString dstFilePath;
     size_t packet_size;
     size_t packet_count;
 } SETTINGS;
@@ -43,11 +44,14 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+    void initGui();
     bool winEvent(MSG * msg, long * result);
 
     Ui::MainWindow* getUi() {
         return ui;
     }
+
+    void log(QString output);
 
 private:
     Ui::MainWindow *ui;
@@ -58,7 +62,8 @@ signals:
 
 public slots:
     void start();
-    void slotBrowseFile();
+    void slotBrowseFileSrc();
+    void slotBrowseFileDst();
     void slotUpdateSettings(void);
 
 };

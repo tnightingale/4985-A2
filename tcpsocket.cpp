@@ -30,7 +30,7 @@ void TCPSocket::accept(PMSG pMsg) {
 
     log << "Remote address (" << inet_ntoa(client.sin_addr)
         << ") connected. (" << (int) clientSocket << ")";
-    outputStatus(output);
+    emit status(output);
 
     Socket::init(clientSocket, hWnd_, FD_READ | FD_CLOSE);
 }

@@ -89,8 +89,8 @@ public:
         qDebug("\tTotal received (bytes): %d", totalRecv);
         qDebug() << "\tBytes received: " << bytesTransferred;
 
-        //data->winsockBuff.buf[bytesTransferred] = '\0';
-        //qDebug() << "\tData:\n" << data->winsockBuff.buf;
+        QDataStream * fileOutput = data->socket->getDataStream();
+        fileOutput->writeRawData(data->winsockBuff.buf, data->winsockBuff.len);
 
         free(data);
         free(overlapped);

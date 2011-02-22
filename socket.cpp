@@ -30,7 +30,7 @@ bool Socket::listen(PSOCKADDR_IN pSockAddr) {
 
     log << "Bound socket " << (int) socket_
         << " to port " << (int) ntohs(pSockAddr->sin_port) << ".";
-    outputStatus(output);
+    emit status(output);
     // TODO: Might want to call linger here.
 
     return true;
@@ -40,7 +40,9 @@ void Socket::close(PMSG pMsg) {
     QString output;
     QTextStream log(&output, QIODevice::WriteOnly);
     log << "Socket: " << (int) pMsg->wParam << " disconnected.";
-    outputStatus(output);
+    emit status(output);
+
+    data_->unsetDevice();
 
     emit signalCloseSocket(pMsg->wParam);
     closesocket(pMsg->wParam);

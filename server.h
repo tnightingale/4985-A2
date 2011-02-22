@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QMainWindow>
+#include <QFile>
 #include <winsock2.h>
 #include <windowsx.h>
 
@@ -14,6 +15,7 @@ class Server : public QObject
 private:
     MainWindow* mainWindow_;
     Connection* connection_;
+    QFile * file_;
 public:
     explicit Server(MainWindow* mainWindow);
 
