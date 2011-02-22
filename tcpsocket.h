@@ -108,7 +108,7 @@ public:
         qDebug() << "\tBytes received: " << bytesTransferred;
 
         QDataStream * fileOutput = data->socket->getDataStream();
-        fileOutput->writeRawData(data->winsockBuff.buf, data->winsockBuff.len);
+        fileOutput->writeRawData(data->winsockBuff.buf, bytesTransferred);
 
         free(data);
         free(overlapped);
