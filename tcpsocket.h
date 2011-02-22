@@ -95,6 +95,7 @@ public:
             << "PKT: " << count << ") "
             << "Received: " << bytesTransferred << ", "
             << "Total: " << totalRecv;
+        data->socket->outputStatus(output);
 
         qDebug("STATIC TCPSocket::recvWorkerRoutine(): Packet no: %d, Bytes received: %d, Total received (bytes): %d", count, bytesTransferred, totalRecv);
 
