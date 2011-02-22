@@ -73,12 +73,12 @@ public:
     static void CALLBACK recvWorkerRoutine(DWORD error, DWORD bytesTransferred,
                                            LPWSAOVERLAPPED overlapped,
                                            DWORD inFlags) {
+        QString output;
+        QTextStream log(&output, QIODevice::WriteOnly);
+
         static int count = 0;
         static int totalRecv = 0;
         int num = 0;
-
-        QString output;
-        QTextStream log(&output, QIODevice::WriteOnly);
         PDATA data;
 
         if (error != 0) {
@@ -91,27 +91,19 @@ public:
 
         data = (PDATA) overlapped->hEvent;
 
-        log << "\t" << (int) data->clientSD << ") "
-            << "PKT: " << count << ") "
+        log << "    " << (int) data->clientSD << ") "
             << "Received: " << bytesTransferred << ", "
             << "Total: " << totalRecv;
         data->socket->outputStatus(output);
 
-        qDebug("STATIC TCPSocket::recvWorkerRoutine(): Packet no: %d, Bytes received: %d, Total received (bytes): %d", count, bytesTransferred, totalRecv);
-
         QDataStream * fileOutput = data->socket->getDataStream();
         if ((num = fileOutput->writeRawData(data->winsockBuff.buf, bytesTransferred)) < 0) {
             qDebug("STATIC TCPSocket::recvWorkerRoutine(): Error writing to file.");
-            log << "Error writing to file.";
-            data->socket->outputStatus(output);
         }
-        QFile * file = (QFile *) fileOutput->device();
-        if (!file->flush()) {
-            qDebug("error flushing file");
-        }
-        qDebug("\tWritten %d bytes.", num);
 
-        data->socket->outputStatus(output);
+        QFile * file = (QFile *) fileOutput->device();
+        if (!file->flush()) qDebug("error flushing file");
+
         free(data);
         free(overlapped);
     }

@@ -62,11 +62,12 @@ public:
     static void CALLBACK recvWorkerRoutine(DWORD error, DWORD bytesTransferred,
                                            LPWSAOVERLAPPED overlapped,
                                            DWORD inFlags) {
-        static int count = 0;
-        static int totalRecv = 0;
-
         QString output;
         QTextStream log(&output, QIODevice::WriteOnly);
+
+        static int count = 0;
+        static int totalRecv = 0;
+        int num = 0;
         PDATA data;
 
         if (error != 0) {
@@ -79,18 +80,18 @@ public:
 
         data = (PDATA) overlapped->hEvent;
 
-        log << "\t DGRAM: " << count << ") "
+        log << "    " << "DGRAM: " << count << ") "
             << "Received: " << bytesTransferred << ", "
             << "Total: " << totalRecv;
         data->socket->outputStatus(output);
 
-        qDebug("STATIC UDPSocket::recvWorkerRoutine()");
-        qDebug("\tPacket no: %d", count);
-        qDebug("\tTotal received (bytes): %d", totalRecv);
-        qDebug() << "\tBytes received: " << bytesTransferred;
-
         QDataStream * fileOutput = data->socket->getDataStream();
-        fileOutput->writeRawData(data->winsockBuff.buf, bytesTransferred);// data->winsockBuff.len);
+        if ((num = fileOutput->writeRawData(data->winsockBuff.buf, bytesTransferred)) < 0) {
+            qDebug("STATIC UDPSocket::recvWorkerRoutine(): Error writing to file.");
+        }
+
+        QFile * file = (QFile *) fileOutput->device();
+        if (!file->flush()) qDebug("error flushing file");
 
         free(data);
         free(overlapped);
