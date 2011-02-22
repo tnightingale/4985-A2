@@ -7,6 +7,7 @@
 #include <QTextStream>
 #include <QDataStream>
 #include <QFile>
+#include <QDebug>
 
 #define MSGSIZE 1024
 #define WM_WSASYNC (WM_USER + 1)
@@ -127,7 +128,9 @@ public:
     void close(PMSG pMsg);
 
     void outputStatus(QString& output) {
+        qDebug() << output;
         emit status(output);
+        output.clear();
     }
 
     /**

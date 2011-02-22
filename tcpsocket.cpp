@@ -16,6 +16,7 @@ TCPSocket::TCPSocket(HWND hWnd) {
 void TCPSocket::accept(PMSG pMsg) {
     QString output;
     QTextStream log(&output, QIODevice::WriteOnly);
+
     SOCKET clientSocket;
     SOCKADDR_IN client;
     int client_length = sizeof(SOCKADDR_IN);
@@ -30,38 +31,40 @@ void TCPSocket::accept(PMSG pMsg) {
 
     log << "Remote address (" << inet_ntoa(client.sin_addr)
         << ") connected. (" << (int) clientSocket << ")";
-    emit status(output);
+    outputStatus(output);
 
     Socket::init(clientSocket, hWnd_, FD_READ | FD_CLOSE);
 }
 
 void TCPSocket::send(PMSG pMsg) {
+    QString output;
+    QTextStream log(&output, QIODevice::WriteOnly);
+
     int err = 0;
     int result = 0;
     int num = 0;
-    size_t bytesRead = 0;
+    size_t bytesToRead = getPacketSize();
     size_t totalSent = 0;
 
     DWORD numBytesSent = 0;
     WSAOVERLAPPED* ol;
     WSABUF winsockBuff;
 
-    winsockBuff.len = getPacketSize();
-    bytesRead = winsockBuff.len;
-
-
     while (data_->status() == QDataStream::Ok) {
-        // These are free'd within TCPSocket::sendWorkerRoutine.
-        winsockBuff.buf = (char *) malloc(winsockBuff.len * sizeof(char));
         ol = (WSAOVERLAPPED*) calloc(1, sizeof(WSAOVERLAPPED));
+        winsockBuff.buf = (char *) malloc(bytesToRead * sizeof(char));
+        ol->hEvent = (HANDLE) winsockBuff.buf;
 
-        if ((num = data_->readRawData(winsockBuff.buf, bytesRead)) <= 0) {
-            qDebug("ABOUT TO TERM: %d", num);
+        if ((num = data_->readRawData(winsockBuff.buf, bytesToRead)) <= 0) {
+            log << "    " << "Finishing...";
+            outputStatus(output);
             break;
         }
+        winsockBuff.len = num;
         totalSent += num;
-        qDebug("Total sent: %d", totalSent);
-        ol->hEvent = (HANDLE) winsockBuff.buf;
+
+        log << "    " << "Packet sent, size: " << num;
+        outputStatus(output);
 
         result = WSASend(pMsg->wParam, &winsockBuff, 1, &numBytesSent, 0, ol,
                           TCPSocket::sendWorkerRoutine);
@@ -75,9 +78,11 @@ void TCPSocket::send(PMSG pMsg) {
         }
 
     }
-    qDebug("TCPSocket::send(): Total bytes sent: %d", totalSent);
+    log << "Total bytes sent: " << totalSent;
+    outputStatus(output);
+
     if (data_->status() == QDataStream::Ok) {
-        shutdown();
+        ::shutdown(socket_, SD_BOTH);
     }
 }
 
@@ -86,7 +91,6 @@ void TCPSocket::receive(PMSG pMsg) {
     DWORD flags = 0;
     DWORD recvBytes;
     WSAOVERLAPPED* ol;
-    WSABUF winsockBuff;
 
     PDATA data = (PDATA) calloc(1, sizeof(DATA));
     data->socket = this;
@@ -138,11 +142,6 @@ bool TCPSocket::connectRemote(PSOCKADDR_IN pSockAddr) {
     }
 
     return true;
-}
-
-void TCPSocket::shutdown() {
-    qDebug("TCPSocket::shutdown()");
-    ::shutdown(socket_, SD_BOTH);
 }
 
 bool TCPSocket::slotProcessWSAEvent(PMSG pMsg) {

@@ -18,6 +18,10 @@ void Client::sendTCP(QString address, int port, size_t packetSize,
     socket_ = new TCPSocket(hWnd);
     socket_->setDataStream(data);
     socket_->setPacketSize(packetSize);
+
+    connect(socket_, SIGNAL(status(QString)),
+            mainWindow_->getUi()->server_log_output, SLOT(append(QString)));
+
     writeTCP(address.toAscii().data(), port);
 }
 
@@ -30,10 +34,17 @@ void Client::sendFileTCP(QString address, int port, size_t packetSize,
     socket_ = new TCPSocket(hWnd);
     socket_->setDataStream(file);
     socket_->setPacketSize(packetSize);
+
+    connect(socket_, SIGNAL(status(QString)),
+            mainWindow_->getUi()->server_log_output, SLOT(append(QString)));
+
     writeTCP(address.toAscii().data(), port);
 }
 
 void Client::writeTCP(char* hostName, int port) {
+    QString output;
+    QTextStream log(&output, QIODevice::WriteOnly);
+
     int err = 0;
     PHOSTENT host;
     SOCKADDR_IN serverSockAddrIn;
@@ -52,9 +63,9 @@ void Client::writeTCP(char* hostName, int port) {
         return;
     }
 
-    qDebug() << "Client::writeTCP(): Client connecting to:" << endl
-             << "\tHost: " << host->h_name << endl
-             << "\tPort: " << port;
+    log << "Client::writeTCP(): Client connecting to: "
+        << host->h_name << ":" << port;
+    tcpsocket->outputStatus(output);
 
     memcpy((char*) &serverSockAddrIn.sin_addr, host->h_addr, host->h_length);
     serverSockAddrIn.sin_family = AF_INET;
@@ -74,6 +85,10 @@ void Client::sendUDP(QString address, int port, size_t packetSize,
     socket_ = new UDPSocket(hWnd);
     socket_->setDataStream(data);
     socket_->setPacketSize(packetSize);
+
+    connect(socket_, SIGNAL(status(QString)),
+            mainWindow_->getUi()->server_log_output, SLOT(append(QString)));
+
     writeUDP(address.toAscii().data(), port);
 }
 
@@ -86,10 +101,17 @@ void Client::sendFileUDP(QString address, int port, size_t packetSize,
     socket_ = new UDPSocket(hWnd);
     socket_->setDataStream(file);
     socket_->setPacketSize(packetSize);
+
+    connect(socket_, SIGNAL(status(QString)),
+            mainWindow_->getUi()->server_log_output, SLOT(append(QString)));
+
     writeUDP(address.toAscii().data(), port);
 }
 
 void Client::writeUDP(char* hostName, int port) {
+    QString output;
+    QTextStream log(&output, QIODevice::WriteOnly);
+
     int err = 0;
     PHOSTENT host;
     UDPSocket * udpsocket = (UDPSocket*) socket_;
@@ -103,9 +125,9 @@ void Client::writeUDP(char* hostName, int port) {
         return;
     }
 
-    qDebug() << "Client::writeUDP(): Client connecting to:" << endl
-             << "\tHost: " << host->h_name << endl
-             << "\tPort: " << port;
+    log << "Client::writeUDP(): Client sending to: "
+        << host->h_name << ":" << port;
+    udpsocket->outputStatus(output);
 
     udpsocket->setDest(host, port);
 

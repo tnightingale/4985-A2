@@ -52,12 +52,6 @@ public:
      */
     bool connectRemote(PSOCKADDR_IN pSockAddr);
 
-    /**
-     *
-     * @author Tom Nightingale
-     */
-    void shutdown();
-
 public slots:
     /**
      *
@@ -131,8 +125,8 @@ public:
                                            LPWSAOVERLAPPED overlapped,
                                            DWORD inFlags) {
 
-        qDebug("TCPSocket::sendWorkerRoutine() Bytes sent: %d",
-               bytesTransferred);
+        //qDebug("TCPSocket::sendWorkerRoutine() Bytes sent: %d",
+        //       bytesTransferred);
 
         if (error != 0) {
           qDebug("I/O operation failed with error %d\n", (int) error);

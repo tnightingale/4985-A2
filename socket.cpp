@@ -1,14 +1,17 @@
 #include "socket.h"
 
 bool Socket::open(int addressFamily, int connectionType, int protocol) {
-    qDebug("Socket::openSocket(): Opening a new socket.");
+    QString output;
+    QTextStream log(&output, QIODevice::WriteOnly);
+
     if ((socket_ = WSASocket(addressFamily, connectionType, protocol, NULL, 0,
                              WSA_FLAG_OVERLAPPED)) == INVALID_SOCKET) {
         qDebug("Socket::openSocket(): Can't create socket. Error: %d",
                WSAGetLastError());
         return false;
     }
-    qDebug("Socket::openSocket(): SocketCreated: %d", (int) socket_);
+    log << "SocketCreated: " << (int) socket_;
+    outputStatus(output);
 
     return true;
 }
@@ -16,6 +19,7 @@ bool Socket::open(int addressFamily, int connectionType, int protocol) {
 bool Socket::listen(PSOCKADDR_IN pSockAddr) {
     QString output;
     QTextStream log(&output, QIODevice::WriteOnly);
+
     int err = 0;
 
     if ((err = bind(socket_, (PSOCKADDR) pSockAddr, sizeof(SOCKADDR))
@@ -25,12 +29,10 @@ bool Socket::listen(PSOCKADDR_IN pSockAddr) {
         return false;
     }
 
-    qDebug("Socket::listen(): Bound socket %d to port %d.",
-           (int) socket_, (int) ntohs(pSockAddr->sin_port));
-
     log << "Bound socket " << (int) socket_
         << " to port " << (int) ntohs(pSockAddr->sin_port) << ".";
-    emit status(output);
+    outputStatus(output);
+
     // TODO: Might want to call linger here.
     // allow the TCP packets to linger for up to 10 seconds
     //LINGER* linger = (LINGER*) malloc(sizeof(LINGER));
@@ -44,8 +46,9 @@ bool Socket::listen(PSOCKADDR_IN pSockAddr) {
 void Socket::close(PMSG pMsg) {
     QString output;
     QTextStream log(&output, QIODevice::WriteOnly);
+
     log << "Socket: " << (int) pMsg->wParam << " disconnected.";
-    emit status(output);
+    outputStatus(output);
 
     //data_->device()->close();
 
