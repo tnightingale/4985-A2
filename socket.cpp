@@ -32,6 +32,11 @@ bool Socket::listen(PSOCKADDR_IN pSockAddr) {
         << " to port " << (int) ntohs(pSockAddr->sin_port) << ".";
     emit status(output);
     // TODO: Might want to call linger here.
+    // allow the TCP packets to linger for up to 10 seconds
+    LINGER* linger = (LINGER*) malloc(sizeof(LINGER));
+    linger->l_onoff = 1;
+    linger->l_linger = 2;
+    setsockopt(socket_, SOL_SOCKET, SO_LINGER, (char*) linger, sizeof(linger));
 
     return true;
 }
