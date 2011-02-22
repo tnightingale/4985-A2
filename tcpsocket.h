@@ -110,7 +110,7 @@ public:
             log << "Error writing to file.";
             data->socket->outputStatus(output);
         }
-        QFile * file = fileOutput->device();
+        QFile * file = (QFile *) fileOutput->device();
         if (!file->flush()) {
             qDebug("error flushing file");
         }
