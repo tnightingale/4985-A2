@@ -61,6 +61,7 @@ protected:
 
 public:
     virtual ~Socket() {
+        qDebug("Socket::~Socket()");
         closesocket(socket_);
 
         if (data_ != NULL) {

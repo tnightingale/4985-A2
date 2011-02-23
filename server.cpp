@@ -49,16 +49,16 @@ bool Server::listenTCP(int port) {
 bool Server::listenUDP(int port) {
     HWND hWnd = mainWindow_->winId();
     SOCKADDR_IN serverSockAddrIn;
-    UDPSocket* udpSocket = new UDPSocket(hWnd);
-    udpSocket->setDataStream(file_);
+    socket_ = new UDPSocket(hWnd);
+    socket_->setDataStream(file_);
 
-    connect(udpSocket, SIGNAL(status(QString)),
+    connect(socket_, SIGNAL(status(QString)),
             mainWindow_->getUi()->server_log_output, SLOT(append(QString)));
 
     connect(mainWindow_, SIGNAL(signalWMWSASyncRx(PMSG)),
-            udpSocket, SLOT(slotProcessWSAEvent(PMSG)));
+            socket_, SLOT(slotProcessWSAEvent(PMSG)));
 
-    if (!Socket::init(udpSocket->getSocket(), hWnd, FD_READ | FD_CLOSE)) {
+    if (!Socket::init(socket_->getSocket(), hWnd, FD_READ | FD_CLOSE)) {
         return false;
     }
 
@@ -67,7 +67,7 @@ bool Server::listenUDP(int port) {
     serverSockAddrIn.sin_addr.s_addr = htonl(INADDR_ANY);
 
     mainWindow_->log(QString("Starting UDP server..."));
-    return udpSocket->listen(&serverSockAddrIn);
+    return socket_->listen(&serverSockAddrIn);
 }
 
 void Server::slotUpdateStats() {}

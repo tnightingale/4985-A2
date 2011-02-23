@@ -119,7 +119,6 @@ void TCPSocket::receive(PMSG pMsg) {
 
 bool TCPSocket::listen(PSOCKADDR_IN pSockAddr) {
     int err = 0;
-    qDebug("TCPSocket::listen()");
 
     if (!Socket::listen(pSockAddr)) {
         return false;

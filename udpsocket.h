@@ -13,7 +13,6 @@ private:
 
 public:
     UDPSocket(HWND hWnd);
-    ~UDPSocket() {}
 
     /**
      *
