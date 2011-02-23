@@ -38,6 +38,10 @@ namespace Ui {
     class MainWindow;
 }
 
+
+class Client;
+class Server;
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -61,12 +65,15 @@ private:
     Ui::MainWindow *ui;
     SETTINGS settings_;
     QTimer * statUpdater_;
+    Client * client_;
+    Server * server_;
 
 signals:
     void signalWMWSASyncRx(PMSG pMsg);
 
 public slots:
     void start();
+    void stop();
     void slotBrowseFileSrc();
     void slotBrowseFileDst();
     void slotUpdateSettings(void);

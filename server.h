@@ -18,6 +18,7 @@ private:
     QFile * file_;
 public:
     explicit Server(MainWindow* mainWindow);
+    virtual ~Server();
 
     bool listenTCP(int port = 7000);
     bool listenUDP(int port = 7000);

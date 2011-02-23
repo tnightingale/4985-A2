@@ -67,6 +67,9 @@ void MainWindow::initGui() {
     // Start button
     connect(ui->start, SIGNAL(clicked()),
             this, SLOT(start()));
+    // Start button
+    connect(ui->stop, SIGNAL(clicked()),
+            this, SLOT(stop()));
 
     QValidator * portValidator = new QIntValidator(7000, 65535, this);
     ui->port_val->setValidator(portValidator);
@@ -77,22 +80,21 @@ void MainWindow::initGui() {
 }
 
 void MainWindow::start() {
-    Server* server;
-    Client* client;
     ui->server_log_output->clear();
+    ui->stop->setEnabled(true);
 
     switch (settings_.mode) {
         case SERVER:
-            server = new Server(this);
+            server_ = new Server(this);
             switch (settings_.protocol) {
                 case TCP:
                     qDebug("MainWindow::start(): Starting tcp server...");
-                    server->listenTCP(settings_.port);
+                    server_->listenTCP(settings_.port);
                     break;
 
                 case UDP:
                     qDebug("MainWindow::start(): Starting udp server...");
-                    server->listenUDP(settings_.port);
+                    server_->listenUDP(settings_.port);
                     break;
 
                 default:
@@ -102,19 +104,19 @@ void MainWindow::start() {
             break;
 
         case CLIENT:
-            client = new Client(this, &settings_);
+            client_ = new Client(this, &settings_);
 
             switch (settings_.protocol) {
                 case TCP:
                     if (ui->file_val->text() == NULL) {
                         qDebug("MainWindow::start(): TCP Client starting");
-                        client->sendTCP(settings_.address,
+                        client_->sendTCP(settings_.address,
                                         settings_.port,
                                         settings_.packet_size,
                                         settings_.packet_count);
                     } else {
                         qDebug("MainWindow::start(): TCP Client starting -- file");
-                        client->sendFileTCP(settings_.address,
+                        client_->sendFileTCP(settings_.address,
                                             settings_.port,
                                             settings_.packet_size,
                                             settings_.srcFilePath);
@@ -124,13 +126,13 @@ void MainWindow::start() {
                 case UDP:
                     if (ui->file_val->text() == NULL) {
                         qDebug("MainWindow::start(): UDP client starting.");
-                        client->sendUDP(settings_.address,
+                        client_->sendUDP(settings_.address,
                                         settings_.port,
                                         settings_.packet_size,
                                         settings_.packet_count);
                     } else {
                         qDebug("MainWindow::start(): UDP Client starting -- file");
-                        client->sendFileUDP(settings_.address,
+                        client_->sendFileUDP(settings_.address,
                                             settings_.port,
                                             settings_.packet_size,
                                             settings_.srcFilePath);
@@ -149,6 +151,14 @@ void MainWindow::start() {
             break;
     }
 
+}
+
+void MainWindow::stop() {
+     if (server_ != NULL) {
+         delete server_;
+     }
+     ui->start->setEnabled(true);
+     ui->stop->setEnabled(false);
 }
 
 bool MainWindow::winEvent(MSG * msg, long * result) {

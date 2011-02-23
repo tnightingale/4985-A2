@@ -4,6 +4,8 @@
 #include "tcpsocket.h"
 #include "udpsocket.h"
 
+Server::~Server() {}
+
 Server::Server(MainWindow* mainWindow) : mainWindow_(mainWindow) {
     file_ = new QFile(mainWindow->getUi()->file_dest_val->text());
     if (!file_->open(QIODevice::WriteOnly)) {

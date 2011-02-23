@@ -9,6 +9,10 @@ Client::Client(MainWindow* mainWindow, SETTINGS * settings)
     settings_ = settings;
 }
 
+Client::~Client() {
+    delete socket_;
+}
+
 void Client::sendTCP(QString address, int port, size_t packetSize,
                      size_t numPackets) {
     HWND hWnd = mainWindow_->winId();

@@ -61,6 +61,7 @@ protected:
 
 public:
     virtual ~Socket() {
+        closesocket(socket_);
         delete data_;
     }
 

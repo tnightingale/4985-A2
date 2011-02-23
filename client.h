@@ -22,6 +22,7 @@ private:
 
 public:
     Client(MainWindow* mainWindow, _SETTINGS_ * settings);
+    ~Client();
 
     /**
      * @param address
