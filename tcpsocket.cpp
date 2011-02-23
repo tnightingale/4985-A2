@@ -46,26 +46,16 @@ void TCPSocket::send(PMSG pMsg) {
     int result = 0;
     int num = 0;
     size_t bytesToRead = getPacketSize();
-    size_t totalSent = 0;
 
     WSAOVERLAPPED* ol;
     WSABUF winsockBuff;
 
+    winsockBuff.buf = socketBuffer_->data();
+    winsockBuff.len = socketBuffer_->size() - 1;
+
     while (data_->status() == QDataStream::Ok) {
         ol = (WSAOVERLAPPED*) calloc(1, sizeof(WSAOVERLAPPED));
-        winsockBuff.buf = (char *) malloc(bytesToRead * sizeof(char));
         ol->hEvent = (HANDLE) winsockBuff.buf;
-
-        if ((num = data_->readRawData(winsockBuff.buf, bytesToRead)) <= 0) {
-            log << "    " << "Finishing...";
-            outputStatus(output);
-            break;
-        }
-        winsockBuff.len = num;
-        totalSent += num;
-
-        log << "    " << "Packet sent, size: " << num;
-        outputStatus(output);
 
         result = WSASend(pMsg->wParam, &winsockBuff, 1, NULL, 0, ol,
                           TCPSocket::sendWorkerRoutine);
@@ -73,16 +63,26 @@ void TCPSocket::send(PMSG pMsg) {
             qDebug("TCPSocket::send(); Error: %d", err);
             return;
         }
-
-        stats_.totalBytes += num;
-        stats_.totalPackets++;
-
         if (result == WSAEWOULDBLOCK) {
+            qDebug("TCPSocket::send(); Socket buffer full: WSAEWOULDBLOCK");
             return;
         }
 
+        stats_.totalBytes += winsockBuff.len;
+        stats_.totalPackets++;
+        log << "    " << "Packet sent, size: " << winsockBuff.len;
+        outputStatus(output);
+
+        delete socketBuffer_;
+        if ((num = loadBuffer(bytesToRead)) <= 0) {
+            log << "    " << "Finishing...";
+            outputStatus(output);
+            break;
+        }
+        winsockBuff.len = num;
     }
-    log << "Total bytes sent: " << totalSent;
+
+    log << "Total bytes sent: " << stats_.totalBytes;
     outputStatus(output);
 
     if (data_->status() == QDataStream::Ok) {
@@ -116,6 +116,17 @@ void TCPSocket::receive(PMSG pMsg) {
 
 }
 
+void TCPSocket::connect(PMSG) {
+    if (loadBuffer(getPacketSize()) < 0) {
+        qDebug("TCPSocket::connect(); Cannot read from data source!");
+        throw "TCPSocket::connect(); Cannot read from data source!";
+    }
+}
+
+int TCPSocket::loadBuffer(size_t bytesToRead) {
+    socketBuffer_ = new QByteArray(bytesToRead, '\0');
+    return data_->readRawData(socketBuffer_->data(), bytesToRead);
+}
 
 bool TCPSocket::listen(PSOCKADDR_IN pSockAddr) {
     int err = 0;
@@ -177,15 +188,16 @@ bool TCPSocket::slotProcessWSAEvent(PMSG pMsg) {
             receive(pMsg);
             break;
 
+        case FD_CONNECT:
+            qDebug("TCPSocket::slotProcessWSAEvent: %d: FD_CONNECT.",
+                   (int) pMsg->wParam);
+            connect(pMsg);
+            break;
+
         case FD_WRITE:
             qDebug("TCPSocket::slotProcessWSAEvent: %d: FD_WRITE.",
                    (int) pMsg->wParam);
             send(pMsg);
-            break;
-
-        case FD_CONNECT:
-            qDebug("TCPSocket::slotProcessWSAEvent: %d: FD_CONNECT.",
-                   (int) pMsg->wParam);
             break;
 
         default:

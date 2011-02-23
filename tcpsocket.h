@@ -35,6 +35,10 @@ public:
      */
     void send(PMSG pMsg);
 
+    void connect(PMSG pMsg);
+
+    int loadBuffer(size_t bytesToRead);
+
     /**
      *
      * @param pSockAddr
@@ -121,8 +125,6 @@ public:
           return;
         }
 
-        char* buff = (char*) overlapped->hEvent;
-        free(buff);
         free(overlapped);
     }
 };

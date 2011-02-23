@@ -55,7 +55,8 @@ void Client::writeTCP(char* hostName, int port) {
     connect(mainWindow_, SIGNAL(signalWMWSASyncRx(PMSG)),
             tcpsocket, SLOT(slotProcessWSAEvent(PMSG)));
 
-    if (!Socket::init(tcpsocket->getSocket(), mainWindow_->winId(), FD_WRITE | FD_CLOSE)) {
+    if (!Socket::init(tcpsocket->getSocket(), mainWindow_->winId(),
+                      FD_CONNECT | FD_WRITE | FD_CLOSE)) {
         return;
     }
 

@@ -44,6 +44,8 @@ protected:
      */
     QDataStream * data_;
 
+    QByteArray * socketBuffer_;
+
     /**
      *
      */
