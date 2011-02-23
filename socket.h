@@ -62,7 +62,10 @@ protected:
 public:
     virtual ~Socket() {
         closesocket(socket_);
-        delete data_;
+
+        if (data_ != NULL) {
+            delete data_;
+        }
     }
 
     /**

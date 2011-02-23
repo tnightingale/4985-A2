@@ -82,6 +82,7 @@ void MainWindow::initGui() {
 void MainWindow::start() {
     ui->server_log_output->clear();
     ui->stop->setEnabled(true);
+    ui->start->setEnabled(false);
 
     switch (settings_.mode) {
         case SERVER:

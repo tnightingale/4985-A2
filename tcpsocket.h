@@ -10,7 +10,6 @@ class TCPSocket : public Socket
     Q_OBJECT
 public:
     TCPSocket(HWND hWnd);
-    ~TCPSocket() {}
 
     /**
      *

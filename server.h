@@ -8,14 +8,14 @@
 #include <windowsx.h>
 
 class MainWindow;
-class Connection;
+class Socket;
 class Server : public QObject
 {
     Q_OBJECT
 private:
     MainWindow* mainWindow_;
-    Connection* connection_;
     QFile * file_;
+    Socket * socket_;
 public:
     explicit Server(MainWindow* mainWindow);
     virtual ~Server();

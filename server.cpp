@@ -4,7 +4,12 @@
 #include "tcpsocket.h"
 #include "udpsocket.h"
 
-Server::~Server() {}
+Server::~Server() {
+    if (socket_ != NULL) {
+        mainWindow_->log(QString("Stopping server..."));
+        delete socket_;
+    }
+}
 
 Server::Server(MainWindow* mainWindow) : mainWindow_(mainWindow) {
     file_ = new QFile(mainWindow->getUi()->file_dest_val->text());
@@ -19,16 +24,16 @@ bool Server::listenTCP(int port) {
     HWND hWnd = mainWindow_->winId();
     SOCKADDR_IN serverSockAddrIn;
 
-    TCPSocket* tcpSocket = new TCPSocket(hWnd);
-    tcpSocket->setDataStream(file_);
+    socket_ = new TCPSocket(hWnd);
+    socket_->setDataStream(file_);
 
-    connect(tcpSocket, SIGNAL(status(QString)),
+    connect(socket_, SIGNAL(status(QString)),
             mainWindow_->getUi()->server_log_output, SLOT(append(QString)));
 
     connect(mainWindow_, SIGNAL(signalWMWSASyncRx(PMSG)),
-            tcpSocket, SLOT(slotProcessWSAEvent(PMSG)));
+            socket_, SLOT(slotProcessWSAEvent(PMSG)));
 
-    if (!Socket::init(tcpSocket->getSocket(), hWnd, FD_CLOSE | FD_ACCEPT)) {
+    if (!Socket::init(socket_->getSocket(), hWnd, FD_CLOSE | FD_ACCEPT)) {
         return false;
     }
 
@@ -38,7 +43,7 @@ bool Server::listenTCP(int port) {
 
     mainWindow_->log(QString("Starting TCP server..."));
 
-    return tcpSocket->listen(&serverSockAddrIn);
+    return socket_->listen(&serverSockAddrIn);
 }
 
 bool Server::listenUDP(int port) {
