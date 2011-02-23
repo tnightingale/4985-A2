@@ -54,11 +54,6 @@ protected:
     /**
      *
      */
-    STATS stats_;
-
-    /**
-     *
-     */
     HWND hWnd_;
 
 public:
@@ -159,15 +154,12 @@ public:
      *
      * @author Tom Nightingale.
      */
-    void initStats() {
-        stats_.startTime = 0;
-        stats_.finishTime = 0;
-        stats_.totalBytes = 0;
-        stats_.totalPackets = 0;
-        emit signalStatsChanged(stats_);
+    static void initStats(STATS& stats) {
+        stats.startTime = 0;
+        stats.finishTime = 0;
+        stats.totalBytes = 0;
+        stats.totalPackets = 0;
     }
-
-    STATS getStats() { return stats_; }
 
     /**
      *
@@ -194,7 +186,10 @@ public:
 signals:
     void signalSocketClosed();
     void status(QString);
-    void signalStatsChanged(STATS);
+    void signalStatsSetBytes(int);
+    void signalStatsSetPackets(int);
+    void signalStatsSetStartTime(int);
+    void signalStatsSetFinishTime(int);
 
 public slots:
     /**

@@ -9,8 +9,6 @@ UDPSocket::UDPSocket(HWND hWnd) {
         throw "TCPConnection::TCPConnection(): Missing WINSOCK2 DLL.";
     }
 
-    initStats();
-
     hWnd_ = hWnd;
     open(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 }
@@ -33,6 +31,7 @@ void UDPSocket::send(PMSG pMsg) {
     winsockBuff.len = getPacketSize();
     bytesRead = winsockBuff.len;
 
+    emit signalStatsSetStartTime(GetTickCount());
 
     while (data_->status() == QDataStream::Ok) {
         ol = (WSAOVERLAPPED*) calloc(1, sizeof(WSAOVERLAPPED));
@@ -54,6 +53,9 @@ void UDPSocket::send(PMSG pMsg) {
                            (PSOCKADDR) &serverSockAddrIn_, sizeof(serverSockAddrIn_), ol,
                            UDPSocket::sendWorkerRoutine);
 
+        emit signalStatsSetBytes(winsockBuff.len);
+        emit signalStatsSetPackets(1);
+
         if ((err = WSAGetLastError()) > 0 && err != ERROR_IO_PENDING) {
             qDebug("UDPSocket::send(); Error: %d", err);
             return;
@@ -67,15 +69,12 @@ void UDPSocket::send(PMSG pMsg) {
     log << "Total bytes sent: " << totalSent;
     outputStatus(output);
 
-    if (data_->status() == QDataStream::Ok) {
-        shutdown(socket_, SD_BOTH);
-    }
+    emit signalStatsSetFinishTime(GetTickCount());
 }
 
 void UDPSocket::receive(PMSG pMsg) {
     int err = 0;
     DWORD flags = 0;
-    DWORD recvBytes;
     WSAOVERLAPPED* ol;
 
     PDATA data = (PDATA) calloc(1, sizeof(DATA));
@@ -87,7 +86,7 @@ void UDPSocket::receive(PMSG pMsg) {
     ol = (WSAOVERLAPPED*) calloc(1, sizeof(WSAOVERLAPPED));
     ol->hEvent = (HANDLE) data;
 
-    if (WSARecvFrom(pMsg->wParam, &(data->winsockBuff), 1, &recvBytes, &flags,
+    if (WSARecvFrom(pMsg->wParam, &(data->winsockBuff), 1, NULL, &flags,
                 NULL, NULL, ol, UDPSocket::recvWorkerRoutine) == SOCKET_ERROR) {
         if ((err = WSAGetLastError()) != WSA_IO_PENDING) {
             qDebug("UDPSocket::receive(): WSARecv() failed with error %d",
@@ -95,6 +94,9 @@ void UDPSocket::receive(PMSG pMsg) {
             return;
         }
     }
+
+    emit signalStatsSetBytes(data->winsockBuff.len);
+    emit signalStatsSetPackets(1);
 }
 
 bool UDPSocket::slotProcessWSAEvent(PMSG pMsg) {

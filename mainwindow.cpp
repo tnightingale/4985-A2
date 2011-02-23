@@ -19,9 +19,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     settings_.packet_count = 100;
     settings_.packet_size = 4096;
-
-    statUpdater_ = new QTimer(this);
-    statUpdater_->start(500);
 }
 
 MainWindow::~MainWindow()

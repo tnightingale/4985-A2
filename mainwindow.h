@@ -57,14 +57,11 @@ public:
         return ui;
     }
 
-    QTimer * getTimer() { return statUpdater_; }
-
     void log(QString output);
 
 private:
     Ui::MainWindow *ui;
     SETTINGS settings_;
-    QTimer * statUpdater_;
     Client * client_;
     Server * server_;
 

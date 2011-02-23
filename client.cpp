@@ -7,6 +7,7 @@
 Client::Client(MainWindow* mainWindow, SETTINGS * settings)
 : mainWindow_(mainWindow) {
     settings_ = settings;
+    Socket::initStats(stats_);
 }
 
 Client::~Client() {
@@ -136,19 +137,42 @@ void Client::writeUDP(char* hostName, int port) {
 }
 
 void Client::initGui() {
-    QTimer * statUpdater = mainWindow_->getTimer();
     connect(socket_, SIGNAL(status(QString)),
             mainWindow_->getUi()->server_log_output, SLOT(append(QString)));
 
-    connect(socket_, SIGNAL(signalStatsChanged(STATS)),
-            mainWindow_, SLOT(slotUpdateClientStats(STATS)));
-    connect(statUpdater, SIGNAL(timeout()),
-            this, SLOT(slotUpdateStats()));
     connect(socket_, SIGNAL(signalSocketClosed()),
             this, SLOT(deleteLater()));
+
+    connect(socket_, SIGNAL(signalStatsSetBytes(int)),
+            this, SLOT(slotStatsSetBytes(int)));
+    connect(socket_, SIGNAL(signalStatsSetPackets(int)),
+            this, SLOT(slotStatsSetPackets(int)));
+    connect(socket_, SIGNAL(signalStatsSetStartTime(int)),
+            this, SLOT(slotStatsSetStartTime(int)));
+    connect(socket_, SIGNAL(signalStatsSetFinishTime(int)),
+            this, SLOT(slotStatsSetFinishTime(int)));
+}
+
+void Client::slotStatsSetBytes(int bytes) {
+    stats_.totalBytes += bytes;
+    slotUpdateStats();
+}
+
+void Client::slotStatsSetPackets(int packets) {
+    stats_.totalPackets += packets;
+    slotUpdateStats();
+}
+
+void Client::slotStatsSetStartTime(int time) {
+    stats_.startTime = time;
+    slotUpdateStats();
+}
+
+void Client::slotStatsSetFinishTime(int time) {
+    stats_.finishTime = time;
+    slotUpdateStats();
 }
 
 void Client::slotUpdateStats() {
-    STATS stats = socket_->getStats();
-    mainWindow_->slotUpdateClientStats(stats);
+    mainWindow_->slotUpdateClientStats(stats_);
 }

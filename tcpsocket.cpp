@@ -9,8 +9,6 @@ TCPSocket::TCPSocket(HWND hWnd) {
         throw "TCPConnection::TCPConnection(): Missing WINSOCK2 DLL.";
     }
 
-    initStats();
-
     hWnd_ = hWnd;
     open(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 }
@@ -30,6 +28,7 @@ void TCPSocket::accept(PMSG pMsg) {
             return;
         }
     }
+    emit signalStatsSetStartTime(GetTickCount());
 
     log << "Remote address (" << inet_ntoa(client.sin_addr)
         << ") connected. (" << (int) clientSocket << ")";
@@ -68,8 +67,8 @@ void TCPSocket::send(PMSG pMsg) {
             return;
         }
 
-        stats_.totalBytes += winsockBuff.len;
-        stats_.totalPackets++;
+        emit signalStatsSetBytes(winsockBuff.len);
+        emit signalStatsSetPackets(1);
         //log << "    " << "Packet sent, size: " << winsockBuff.len;
         //outputStatus(output);
 
@@ -82,8 +81,8 @@ void TCPSocket::send(PMSG pMsg) {
         winsockBuff.len = num;
     }
 
-    log << "Total bytes sent: " << stats_.totalBytes;
-    outputStatus(output);
+    //log << "Total bytes sent: " << stats_.totalBytes;
+    //outputStatus(output);
 
     if (data_->status() == QDataStream::Ok) {
         ::shutdown(socket_, SD_SEND);
@@ -93,7 +92,6 @@ void TCPSocket::send(PMSG pMsg) {
 void TCPSocket::receive(PMSG pMsg) {
     int err = 0;
     DWORD flags = 0;
-    DWORD recvBytes;
     WSAOVERLAPPED* ol;
 
     PDATA data = (PDATA) calloc(1, sizeof(DATA));
@@ -105,7 +103,7 @@ void TCPSocket::receive(PMSG pMsg) {
     ol = (WSAOVERLAPPED*) calloc(1, sizeof(WSAOVERLAPPED));
     ol->hEvent = (HANDLE) data;
 
-    if (WSARecv(pMsg->wParam, &(data->winsockBuff), 1, &recvBytes, &flags,
+    if (WSARecv(pMsg->wParam, &(data->winsockBuff), 1, NULL, &flags,
                 ol, TCPSocket::recvWorkerRoutine) == SOCKET_ERROR) {
         if ((err = WSAGetLastError()) != WSA_IO_PENDING) {
             qDebug("TCPSocket::receive(): WSARecv() failed with error %d",
@@ -113,6 +111,9 @@ void TCPSocket::receive(PMSG pMsg) {
             return;
         }
     }
+
+    emit signalStatsSetBytes(data->winsockBuff.len);
+    emit signalStatsSetPackets(1);
 
 }
 
@@ -160,7 +161,7 @@ bool TCPSocket::connectRemote(PSOCKADDR_IN pSockAddr) {
         }
     }
 
-    stats_.startTime = GetTickCount();
+    emit signalStatsSetStartTime(GetTickCount());
 
     return true;
 }

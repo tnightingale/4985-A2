@@ -18,6 +18,8 @@ Server::Server(MainWindow* mainWindow) : mainWindow_(mainWindow) {
                          + mainWindow->getUi()->file_dest_val->text());
         throw "Server::Server; Cannot open file for write.";
     }
+
+    Socket::initStats(stats_);
 }
 
 bool Server::listenTCP(int port) {
@@ -27,8 +29,7 @@ bool Server::listenTCP(int port) {
     socket_ = new TCPSocket(hWnd);
     socket_->setDataStream(file_);
 
-    connect(socket_, SIGNAL(status(QString)),
-            mainWindow_->getUi()->server_log_output, SLOT(append(QString)));
+    initGui();
 
     connect(mainWindow_, SIGNAL(signalWMWSASyncRx(PMSG)),
             socket_, SLOT(slotProcessWSAEvent(PMSG)));
@@ -52,8 +53,7 @@ bool Server::listenUDP(int port) {
     socket_ = new UDPSocket(hWnd);
     socket_->setDataStream(file_);
 
-    connect(socket_, SIGNAL(status(QString)),
-            mainWindow_->getUi()->server_log_output, SLOT(append(QString)));
+    initGui();
 
     connect(mainWindow_, SIGNAL(signalWMWSASyncRx(PMSG)),
             socket_, SLOT(slotProcessWSAEvent(PMSG)));
@@ -70,4 +70,40 @@ bool Server::listenUDP(int port) {
     return socket_->listen(&serverSockAddrIn);
 }
 
-void Server::slotUpdateStats() {}
+void Server::initGui() {
+    connect(socket_, SIGNAL(status(QString)),
+            mainWindow_->getUi()->server_log_output, SLOT(append(QString)));
+
+    connect(socket_, SIGNAL(signalStatsSetBytes(int)),
+            this, SLOT(slotStatsSetBytes(int)));
+    connect(socket_, SIGNAL(signalStatsSetPackets(int)),
+            this, SLOT(slotStatsSetPackets(int)));
+    connect(socket_, SIGNAL(signalStatsStartTime(int)),
+            this, SLOT(slotStatsSetStartTime(int)));
+    connect(socket_, SIGNAL(signalStatsSetFinishTime(int)),
+            this, SLOT(slotStatsSetFinishTime(int)));
+}
+
+void Server::slotStatsSetBytes(int bytes) {
+    stats_.totalBytes += bytes;
+    slotUpdateStats();
+}
+
+void Server::slotStatsSetPackets(int packets) {
+    stats_.totalPackets += packets;
+    slotUpdateStats();
+}
+
+void Server::slotStatsSetStartTime(int time) {
+    stats_.startTime = time;
+    slotUpdateStats();
+}
+
+void Server::slotStatsSetFinishTime(int time) {
+    stats_.finishTime = time;
+    slotUpdateStats();
+}
+
+void Server::slotUpdateStats() {
+    mainWindow_->slotUpdateServerStats(stats_);
+}
