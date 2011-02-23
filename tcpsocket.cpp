@@ -51,7 +51,7 @@ void TCPSocket::send(PMSG pMsg) {
     WSABUF winsockBuff;
 
     winsockBuff.buf = socketBuffer_->data();
-    winsockBuff.len = socketBuffer_->size() - 1;
+    winsockBuff.len = socketBuffer_->size();
 
     while (data_->status() == QDataStream::Ok) {
         ol = (WSAOVERLAPPED*) calloc(1, sizeof(WSAOVERLAPPED));
@@ -70,8 +70,8 @@ void TCPSocket::send(PMSG pMsg) {
 
         stats_.totalBytes += winsockBuff.len;
         stats_.totalPackets++;
-        log << "    " << "Packet sent, size: " << winsockBuff.len;
-        outputStatus(output);
+        //log << "    " << "Packet sent, size: " << winsockBuff.len;
+        //outputStatus(output);
 
         delete socketBuffer_;
         if ((num = loadBuffer(bytesToRead)) <= 0) {
@@ -86,7 +86,7 @@ void TCPSocket::send(PMSG pMsg) {
     outputStatus(output);
 
     if (data_->status() == QDataStream::Ok) {
-        ::shutdown(socket_, SD_BOTH);
+        //::shutdown(socket_, SD_BOTH);
     }
 }
 
@@ -125,6 +125,10 @@ void TCPSocket::connect(PMSG) {
 
 int TCPSocket::loadBuffer(size_t bytesToRead) {
     socketBuffer_ = new QByteArray(bytesToRead, '\0');
+    if (data_->atEnd()) {
+        qDebug("TCPSocket::loadBuffer(); data->atend()");
+        return 0;
+    }
     return data_->readRawData(socketBuffer_->data(), bytesToRead);
 }
 

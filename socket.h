@@ -83,8 +83,7 @@ public:
      *
      * @author Tom Nightingale.
      */
-    void setDataStream(char * data) {
-        QByteArray * qba = new QByteArray(data);
+    void setDataStream(QByteArray * qba) {
         data_ = new QDataStream(qba, QIODevice::ReadOnly);
     }
 

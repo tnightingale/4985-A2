@@ -16,9 +16,8 @@ Client::~Client() {
 void Client::sendTCP(QString address, int port, size_t packetSize,
                      size_t numPackets) {
     HWND hWnd = mainWindow_->winId();
-    char * data = (char *) malloc(packetSize * numPackets * sizeof(char));
-    memset(data, 'p', packetSize * numPackets);
 
+    QByteArray * data = new QByteArray(packetSize * numPackets, 'P');
     socket_ = new TCPSocket(hWnd);
     socket_->setDataStream(data);
     socket_->setPacketSize(packetSize);
@@ -82,9 +81,8 @@ void Client::writeTCP(char* hostName, int port) {
 void Client::sendUDP(QString address, int port, size_t packetSize,
                      size_t numPackets) {
     HWND hWnd = mainWindow_->winId();
-    char * data = (char *) malloc(packetSize * numPackets * sizeof(char));
-    memset(data, 'p', packetSize * numPackets);
 
+    QByteArray * data = new QByteArray(packetSize * numPackets, 'U');
     socket_ = new UDPSocket(hWnd);
     socket_->setDataStream(data);
     socket_->setPacketSize(packetSize);
