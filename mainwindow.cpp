@@ -81,11 +81,11 @@ void MainWindow::initGui() {
 
 void MainWindow::start() {
     ui->server_log_output->clear();
-    ui->stop->setEnabled(true);
-    ui->start->setEnabled(false);
 
     switch (settings_.mode) {
         case SERVER:
+            ui->stop->setEnabled(true);
+            ui->start->setEnabled(false);
             server_ = new Server(this);
             switch (settings_.protocol) {
                 case TCP:
@@ -155,11 +155,11 @@ void MainWindow::start() {
 }
 
 void MainWindow::stop() {
-     if (server_ != NULL) {
-         delete server_;
-     }
-     ui->start->setEnabled(true);
-     ui->stop->setEnabled(false);
+    if (server_ != NULL) {
+     delete server_;
+    }
+    ui->start->setEnabled(true);
+    ui->stop->setEnabled(false);
 }
 
 bool MainWindow::winEvent(MSG * msg, long * result) {

@@ -54,8 +54,8 @@ void Socket::close(PMSG pMsg) {
         stats_.finishTime = GetTickCount();
     }
 
-    emit signalCloseSocket(pMsg->wParam);
     closesocket(pMsg->wParam);
+    emit signalSocketClosed();
 }
 
 

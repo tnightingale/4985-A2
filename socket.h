@@ -191,7 +191,7 @@ public:
     }
 
 signals:
-    void signalCloseSocket(SOCKET socket);
+    void signalSocketClosed();
     void status(QString);
     void signalStatsChanged(STATS);
 

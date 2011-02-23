@@ -145,6 +145,8 @@ void Client::initGui() {
             mainWindow_, SLOT(slotUpdateClientStats(STATS)));
     connect(statUpdater, SIGNAL(timeout()),
             this, SLOT(slotUpdateStats()));
+    connect(socket_, SIGNAL(signalSocketClosed()),
+            this, SLOT(deleteLater()));
 }
 
 void Client::slotUpdateStats() {
