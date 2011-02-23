@@ -75,3 +75,8 @@ bool Socket::slotProcessWSAEvent(PMSG pMsg) {
 
     return true;
 }
+
+void Socket::updatePacketReceived(int bytes) {
+    emit signalStatsSetBytes(bytes);
+    emit signalStatsSetPackets(1);
+}

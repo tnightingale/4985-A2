@@ -183,6 +183,14 @@ public:
         return true;
     }
 
+    /**
+     *
+     * @param bytes
+     *
+     * @author Tom Nightingale.
+     */
+    void updatePacketReceived(int bytes);
+
 signals:
     void signalSocketClosed();
     void status(QString);

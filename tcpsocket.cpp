@@ -112,8 +112,6 @@ void TCPSocket::receive(PMSG pMsg) {
         }
     }
 
-    emit signalStatsSetBytes(data->winsockBuff.len);
-    emit signalStatsSetPackets(1);
 
 }
 
@@ -212,3 +210,4 @@ bool TCPSocket::slotProcessWSAEvent(PMSG pMsg) {
 
     return true;
 }
+

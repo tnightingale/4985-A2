@@ -78,6 +78,7 @@ public:
         totalRecv += bytesTransferred;
 
         data = (PDATA) overlapped->hEvent;
+        data->socket->updatePacketReceived(bytesTransferred);
 
         log << "    " << "DGRAM: " << count << ") "
             << "Received: " << bytesTransferred << ", "

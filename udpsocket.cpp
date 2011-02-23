@@ -94,9 +94,6 @@ void UDPSocket::receive(PMSG pMsg) {
             return;
         }
     }
-
-    emit signalStatsSetBytes(data->winsockBuff.len);
-    emit signalStatsSetPackets(1);
 }
 
 bool UDPSocket::slotProcessWSAEvent(PMSG pMsg) {
