@@ -9,6 +9,8 @@ TCPSocket::TCPSocket(HWND hWnd) {
         throw "TCPConnection::TCPConnection(): Missing WINSOCK2 DLL.";
     }
 
+    initStats();
+
     hWnd_ = hWnd;
     open(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 }
@@ -46,7 +48,6 @@ void TCPSocket::send(PMSG pMsg) {
     size_t bytesToRead = getPacketSize();
     size_t totalSent = 0;
 
-    DWORD numBytesSent = 0;
     WSAOVERLAPPED* ol;
     WSABUF winsockBuff;
 
@@ -66,12 +67,15 @@ void TCPSocket::send(PMSG pMsg) {
         log << "    " << "Packet sent, size: " << num;
         outputStatus(output);
 
-        result = WSASend(pMsg->wParam, &winsockBuff, 1, &numBytesSent, 0, ol,
+        result = WSASend(pMsg->wParam, &winsockBuff, 1, NULL, 0, ol,
                           TCPSocket::sendWorkerRoutine);
         if ((err = WSAGetLastError()) > 0 && err != ERROR_IO_PENDING) {
             qDebug("TCPSocket::send(); Error: %d", err);
             return;
         }
+
+        stats_.totalBytes += num;
+        stats_.totalPackets++;
 
         if (result == WSAEWOULDBLOCK) {
             return;
@@ -140,6 +144,8 @@ bool TCPSocket::connectRemote(PSOCKADDR_IN pSockAddr) {
             return false;
         }
     }
+
+    stats_.startTime = GetTickCount();
 
     return true;
 }

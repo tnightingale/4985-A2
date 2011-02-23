@@ -9,6 +9,8 @@ UDPSocket::UDPSocket(HWND hWnd) {
         throw "TCPConnection::TCPConnection(): Missing WINSOCK2 DLL.";
     }
 
+    initStats();
+
     hWnd_ = hWnd;
     open(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 }

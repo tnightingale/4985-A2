@@ -19,8 +19,7 @@ void Client::sendTCP(QString address, int port, size_t packetSize,
     socket_->setDataStream(data);
     socket_->setPacketSize(packetSize);
 
-    connect(socket_, SIGNAL(status(QString)),
-            mainWindow_->getUi()->server_log_output, SLOT(append(QString)));
+    initGui();
 
     writeTCP(address.toAscii().data(), port);
 }
@@ -35,8 +34,7 @@ void Client::sendFileTCP(QString address, int port, size_t packetSize,
     socket_->setDataStream(file);
     socket_->setPacketSize(packetSize);
 
-    connect(socket_, SIGNAL(status(QString)),
-            mainWindow_->getUi()->server_log_output, SLOT(append(QString)));
+    initGui();
 
     writeTCP(address.toAscii().data(), port);
 }
@@ -86,8 +84,7 @@ void Client::sendUDP(QString address, int port, size_t packetSize,
     socket_->setDataStream(data);
     socket_->setPacketSize(packetSize);
 
-    connect(socket_, SIGNAL(status(QString)),
-            mainWindow_->getUi()->server_log_output, SLOT(append(QString)));
+    initGui();
 
     writeUDP(address.toAscii().data(), port);
 }
@@ -102,8 +99,7 @@ void Client::sendFileUDP(QString address, int port, size_t packetSize,
     socket_->setDataStream(file);
     socket_->setPacketSize(packetSize);
 
-    connect(socket_, SIGNAL(status(QString)),
-            mainWindow_->getUi()->server_log_output, SLOT(append(QString)));
+    initGui();
 
     writeUDP(address.toAscii().data(), port);
 }
@@ -134,4 +130,20 @@ void Client::writeUDP(char* hostName, int port) {
     if (!Socket::init(udpsocket->getSocket(), mainWindow_->winId(), FD_WRITE | FD_CLOSE)) {
         return;
     }
+}
+
+void Client::initGui() {
+    QTimer * statUpdater = mainWindow_->getTimer();
+    connect(socket_, SIGNAL(status(QString)),
+            mainWindow_->getUi()->server_log_output, SLOT(append(QString)));
+
+    connect(socket_, SIGNAL(signalStatsChanged(STATS)),
+            mainWindow_, SLOT(slotUpdateClientStats(STATS)));
+    connect(statUpdater, SIGNAL(timeout()),
+            this, SLOT(slotUpdateStats()));
+}
+
+void Client::slotUpdateStats() {
+    STATS stats = socket_->getStats();
+    mainWindow_->slotUpdateClientStats(stats);
 }

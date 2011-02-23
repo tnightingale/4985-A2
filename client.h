@@ -62,9 +62,16 @@ public:
      */
     void send();
 
+    /**
+     *
+     * @author Tom Nightingale.
+     */
+    void initGui();
+
 signals:
 
 public slots:
+    void slotUpdateStats();
 
 };
 

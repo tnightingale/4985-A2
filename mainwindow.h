@@ -10,6 +10,8 @@
 #include <QRegExpValidator>
 #include <QRegExp>
 #include <QHostAddress>
+#include <QTimer>
+#include "socket.h"
 
 enum IPTEST_MODE {
     CLIENT,
@@ -51,11 +53,14 @@ public:
         return ui;
     }
 
+    QTimer * getTimer() { return statUpdater_; }
+
     void log(QString output);
 
 private:
     Ui::MainWindow *ui;
     SETTINGS settings_;
+    QTimer * statUpdater_;
 
 signals:
     void signalWMWSASyncRx(PMSG pMsg);
@@ -65,6 +70,8 @@ public slots:
     void slotBrowseFileSrc();
     void slotBrowseFileDst();
     void slotUpdateSettings(void);
+    void slotUpdateClientStats(STATS);
+    void slotUpdateServerStats(STATS);
 
 };
 

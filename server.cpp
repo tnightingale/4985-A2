@@ -62,3 +62,5 @@ bool Server::listenUDP(int port) {
     mainWindow_->log(QString("Starting UDP server..."));
     return udpSocket->listen(&serverSockAddrIn);
 }
+
+void Server::slotUpdateStats() {}

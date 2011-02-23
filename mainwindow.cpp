@@ -19,6 +19,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     settings_.packet_count = 100;
     settings_.packet_size = 4096;
+
+    statUpdater_ = new QTimer(this);
+    statUpdater_->start(500);
 }
 
 MainWindow::~MainWindow()
@@ -76,8 +79,7 @@ void MainWindow::initGui() {
 void MainWindow::start() {
     Server* server;
     Client* client;
-    char* address;
-    char* data;
+    ui->server_log_output->clear();
 
     switch (settings_.mode) {
         case SERVER:
@@ -221,4 +223,18 @@ void MainWindow::slotUpdateSettings(void) {
 
 void MainWindow::log(QString output) {
     ui->server_log_output->append(output);
+}
+
+void MainWindow::slotUpdateClientStats(_STATS_ stats) {
+    ui->client_bytes_tx->setText(QString().setNum(stats.totalBytes));
+    ui->client_pkts_tx->setText(QString().setNum(stats.totalPackets));
+
+    if (stats.startTime > 0 && stats.finishTime > 0) {
+        double time = (stats.finishTime - stats.startTime) / 1000;
+        ui->client_time_elapsed->setText(QString().setNum(time, 'f', 2));
+    }
+}
+
+void MainWindow::slotUpdateServerStats(_STATS_ stats) {
+   // ui->server_bytes_rx->setText(QString().setNum(stats.totalBytes));
 }

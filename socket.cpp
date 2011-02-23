@@ -50,7 +50,9 @@ void Socket::close(PMSG pMsg) {
     log << "Socket: " << (int) pMsg->wParam << " disconnected.";
     outputStatus(output);
 
-    //data_->device()->close();
+    if (stats_.finishTime == 0) {
+        stats_.finishTime = GetTickCount();
+    }
 
     emit signalCloseSocket(pMsg->wParam);
     closesocket(pMsg->wParam);

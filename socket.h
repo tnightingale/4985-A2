@@ -23,6 +23,13 @@ typedef struct _DATA_ {
     SOCKET clientSD;
 } DATA, *PDATA;
 
+typedef struct _STATS_ {
+    int totalBytes;
+    int totalPackets;
+    DWORD startTime;
+    DWORD finishTime;
+} STATS, *PSTATS;
+
 class Socket : public QObject
 {
     Q_OBJECT
@@ -45,6 +52,11 @@ protected:
     /**
      *
      */
+    STATS stats_;
+
+    /**
+     *
+     */
     HWND hWnd_;
 
 public:
@@ -52,6 +64,10 @@ public:
         delete data_;
     }
 
+    /**
+     *
+     * @author Tom Nightingale.
+     */
     SOCKET getSocket() { return socket_; }
 
     /**
@@ -135,6 +151,20 @@ public:
 
     /**
      *
+     * @author Tom Nightingale.
+     */
+    void initStats() {
+        stats_.startTime = 0;
+        stats_.finishTime = 0;
+        stats_.totalBytes = 0;
+        stats_.totalPackets = 0;
+        emit signalStatsChanged(stats_);
+    }
+
+    STATS getStats() { return stats_; }
+
+    /**
+     *
      * @param socket
      * @param hWnd
      * @param flags
@@ -158,6 +188,7 @@ public:
 signals:
     void signalCloseSocket(SOCKET socket);
     void status(QString);
+    void signalStatsChanged(STATS);
 
 public slots:
     /**

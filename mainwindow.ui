@@ -24,7 +24,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="tab_client">
      <property name="whatsThis">
@@ -202,10 +202,6 @@
         <string>File:</string>
        </property>
       </widget>
-      <zorder>file_val</zorder>
-      <zorder>file_browse</zorder>
-      <zorder>file_label</zorder>
-      <zorder>lcdNumber</zorder>
      </widget>
      <widget class="QGroupBox" name="dest_settings">
       <property name="geometry">
@@ -310,10 +306,10 @@
       <widget class="QLabel" name="client_bytes_tx">
        <property name="geometry">
         <rect>
-         <x>90</x>
+         <x>30</x>
          <y>50</y>
-         <width>41</width>
-         <height>16</height>
+         <width>101</width>
+         <height>20</height>
         </rect>
        </property>
        <property name="text">
@@ -326,10 +322,10 @@
       <widget class="QLabel" name="client_time_elapsed">
        <property name="geometry">
         <rect>
-         <x>90</x>
+         <x>30</x>
          <y>90</y>
-         <width>41</width>
-         <height>16</height>
+         <width>101</width>
+         <height>20</height>
         </rect>
        </property>
        <property name="text">
@@ -342,10 +338,10 @@
       <widget class="QLabel" name="client_pkts_tx">
        <property name="geometry">
         <rect>
-         <x>230</x>
+         <x>180</x>
          <y>50</y>
-         <width>41</width>
-         <height>16</height>
+         <width>91</width>
+         <height>20</height>
         </rect>
        </property>
        <property name="text">
@@ -480,10 +476,10 @@
       <widget class="QLabel" name="svr_bytes_rx">
        <property name="geometry">
         <rect>
-         <x>90</x>
+         <x>40</x>
          <y>50</y>
-         <width>41</width>
-         <height>16</height>
+         <width>91</width>
+         <height>20</height>
         </rect>
        </property>
        <property name="text">
@@ -496,10 +492,10 @@
       <widget class="QLabel" name="svr_time_elapsed">
        <property name="geometry">
         <rect>
-         <x>90</x>
+         <x>40</x>
          <y>90</y>
-         <width>41</width>
-         <height>16</height>
+         <width>91</width>
+         <height>20</height>
         </rect>
        </property>
        <property name="text">
@@ -512,10 +508,10 @@
       <widget class="QLabel" name="svr_pkts_rx">
        <property name="geometry">
         <rect>
-         <x>230</x>
+         <x>180</x>
          <y>50</y>
-         <width>41</width>
-         <height>16</height>
+         <width>91</width>
+         <height>20</height>
         </rect>
        </property>
        <property name="text">
