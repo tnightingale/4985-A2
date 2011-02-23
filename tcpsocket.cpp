@@ -86,7 +86,7 @@ void TCPSocket::send(PMSG pMsg) {
     outputStatus(output);
 
     if (data_->status() == QDataStream::Ok) {
-        //::shutdown(socket_, SD_BOTH);
+        ::shutdown(socket_, SD_SEND);
     }
 }
 
