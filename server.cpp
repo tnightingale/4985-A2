@@ -78,7 +78,7 @@ void Server::initGui() {
             this, SLOT(slotStatsSetBytes(int)));
     connect(socket_, SIGNAL(signalStatsSetPackets(int)),
             this, SLOT(slotStatsSetPackets(int)));
-    connect(socket_, SIGNAL(signalStatsStartTime(int)),
+    connect(socket_, SIGNAL(signalStatsSetStartTime(int)),
             this, SLOT(slotStatsSetStartTime(int)));
     connect(socket_, SIGNAL(signalStatsSetFinishTime(int)),
             this, SLOT(slotStatsSetFinishTime(int)));

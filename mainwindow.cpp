@@ -244,5 +244,11 @@ void MainWindow::slotUpdateClientStats(_STATS_ stats) {
 }
 
 void MainWindow::slotUpdateServerStats(_STATS_ stats) {
-   // ui->server_bytes_rx->setText(QString().setNum(stats.totalBytes));
+    ui->svr_bytes_rx->setText(QString().setNum(stats.totalBytes));
+    ui->svr_pkts_rx->setText(QString().setNum(stats.totalPackets));
+
+    if (stats.startTime > 0 && stats.finishTime > 0) {
+        double time = (stats.finishTime - stats.startTime) / 1000;
+        ui->svr_time_elapsed->setText(QString().setNum(time, 'f', 2));
+    }
 }
