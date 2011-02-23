@@ -191,6 +191,14 @@ public:
      */
     void updatePacketReceived(int bytes);
 
+    /**
+     *
+     * @param time
+     *
+     * @author Tom Nightingale.
+     */
+    void updatePacketReceivedTime(int time);
+
 signals:
     void signalSocketClosed();
     void status(QString);

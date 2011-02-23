@@ -80,3 +80,7 @@ void Socket::updatePacketReceived(int bytes) {
     emit signalStatsSetBytes(bytes);
     emit signalStatsSetPackets(1);
 }
+
+void Socket::updatePacketReceivedTime(int time) {
+    emit signalStatsSetFinishTime(time);
+}

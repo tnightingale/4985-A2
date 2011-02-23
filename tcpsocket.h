@@ -76,11 +76,6 @@ public:
     static void CALLBACK recvWorkerRoutine(DWORD error, DWORD bytesTransferred,
                                            LPWSAOVERLAPPED overlapped,
                                            DWORD inFlags) {
-        QString output;
-        QTextStream log(&output, QIODevice::WriteOnly);
-
-        static int count = 0;
-        static int totalRecv = 0;
         int num = 0;
         PDATA data;
 
@@ -89,16 +84,8 @@ public:
           return;
         }
 
-        count++;
-        totalRecv += bytesTransferred;
-
         data = (PDATA) overlapped->hEvent;
         data->socket->updatePacketReceived(bytesTransferred);
-
-        log << "    " << (int) data->clientSD << ") "
-            << "Received: " << bytesTransferred << ", "
-            << "Total: " << totalRecv;
-        data->socket->outputStatus(output);
 
         QDataStream * fileOutput = data->socket->getDataStream();
         if ((num = fileOutput->writeRawData(data->winsockBuff.buf, bytesTransferred)) < 0) {

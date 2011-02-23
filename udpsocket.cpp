@@ -68,8 +68,6 @@ void UDPSocket::send(PMSG pMsg) {
     }
     log << "Total bytes sent: " << totalSent;
     outputStatus(output);
-
-    emit signalStatsSetFinishTime(GetTickCount());
 }
 
 void UDPSocket::receive(PMSG pMsg) {
