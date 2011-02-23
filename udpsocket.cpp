@@ -110,6 +110,7 @@ bool UDPSocket::slotProcessWSAEvent(PMSG pMsg) {
         case FD_READ:
             qDebug("UDPSocket::slotProcessWSAEvent: %d: FD_READ.",
                    (int) pMsg->wParam);
+            emit signalStatsSetStartTime(GetTickCount());
             receive(pMsg);
             break;
 

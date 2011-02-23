@@ -95,8 +95,10 @@ void Server::slotStatsSetPackets(int packets) {
 }
 
 void Server::slotStatsSetStartTime(int time) {
-    stats_.startTime = time;
-    slotUpdateStats();
+    if (stats_.startTime == 0) {
+        stats_.startTime = time;
+        slotUpdateStats();
+    }
 }
 
 void Server::slotStatsSetFinishTime(int time) {
